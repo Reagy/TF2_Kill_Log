@@ -1,7 +1,5 @@
 <?php
 
-error_reporting(E_ALL);
-
 //Set encoding
 ini_set('default_charset', 'utf-8');
 
@@ -18,8 +16,14 @@ const STEAM_APIKEY  = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 function SteamTo64($key) 
 { 
+  if (preg_match('/^\[U:[0-9]:([0-9]+)\]$/', $key, $matches)) {
+    $key = '7656'.(1197960265728 + $matches[1]);
+    return $key;
+  }
+  else {
     $key = '7656'.(((substr($key, 10)) * 2) + 1197960265728 + (substr($key, 8, 1)));
-    return $key; 
+    return $key;
+  }
 }
 
 function ToSteam64($key) 

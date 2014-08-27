@@ -18,8 +18,16 @@ const STEAM_APIKEY  = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 function SteamTo64($key) 
 { 
-    $key = '7656'.(((substr($key, 10)) * 2) + 1197960265728 + (substr($key, 8, 1)));
-    return $key; 
+    $accountId = 0;
+
+    if (preg_match('/^STEAM_[0-9]:([0-9]):([0-9]+)$/i', $key, $matches)) {
+        $accountId = $matches[1] + ($matches[2] * 2);
+    }
+    if (preg_match('/^\[U:[0-9]:([0-9]+)\]$/i', $key, $matches)) {
+        $accountId = $matches[1];
+    }
+
+    return gmp_strval(gmp_add('76561197960265728', $accountId));
 }
 
 function ToSteam64($key) 

@@ -52,7 +52,7 @@ public OnPluginStart() {
 	openDB();
 	CreateConVar("sm_tf2_kill_log_v", PLUGIN_VERSION, "TF2 Kill Log", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	g_ExLog = CreateConVar("klog_extended", "1", "1 Enables / 0 Disables extended log features");
-	g_URL = CreateConVar("klog_url","","Kill Log URL, example: http://yoursite.com/stats/", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
+	g_URL = CreateConVar("klog_url","","Kill Log URL, example: yoursite.com/stats/", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	RegConsoleCmd("sm_rank", Command_OpenRank, "Opens player's Kill Log profile"); 
 	hookEvent();
 }

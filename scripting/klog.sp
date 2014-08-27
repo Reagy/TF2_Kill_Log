@@ -6,7 +6,7 @@
 #include <tf2_stocks>
 #include <geoip>
 
-#define PLUGIN_VERSION "0.7"
+#define PLUGIN_VERSION "0.7.6"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 
@@ -86,7 +86,7 @@ public OnPluginEnd() {
 
 			decl String:query[1024];
 			Format(query, sizeof(query), "UPDATE `playerlog` SET `disconnect_time` = %d, `playtime` = `playtime` + %d, `kills` = `kills` + %d, `deaths` = `deaths` + %d, `feigns` = `feigns` + %d, `assists` = `assists` + %d, `dominations` = `dominations` + %d, `revenges` = `revenges` + %d, `headshots` = `headshots` + %d, `backstabs` = `backstabs` + %d, `obj_built` = `obj_built` + %d, `obj_destroy` = `obj_destroy` + %d, `tele_player` = `tele_player` + %d, `flag_pick` = `flag_pick` + %d, `flag_cap` = `flag_cap` + %d, `flag_def` = `flag_def` + %d, `flag_drop` = `flag_drop` + %d, `cp_cap` = `cp_cap` + %d, `cp_block` = `cp_block` + %d WHERE id = %d",
-				GetTime(), GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][p_teleported], scores[client][obj_built], scores[client][obj_destroy], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
+				GetTime(), GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][obj_built], scores[client][obj_destroy], scores[client][p_teleported], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
 			SQL_TQuery(g_DB, OnRowUpdated, query, g_RowID[client]);
 			g_ConnectTime[client] = 0;
 		}
@@ -329,7 +329,7 @@ public OnClientDisconnect(client) {
 
 	decl String:query[1024];
 	Format(query, sizeof(query), "UPDATE `playerlog` SET `disconnect_time` = %d, `playtime` = `playtime` + %d, `kills` = `kills` + %d, `deaths` = `deaths` + %d, `feigns` = `feigns` + %d, `assists` = `assists` + %d, `dominations` = `dominations` + %d, `revenges` = `revenges` + %d, `headshots` = `headshots` + %d, `backstabs` = `backstabs` + %d, `obj_built` = `obj_built` + %d, `obj_destroy` = `obj_destroy` + %d, `tele_player` = `tele_player` + %d, `flag_pick` = `flag_pick` + %d, `flag_cap` = `flag_cap` + %d, `flag_def` = `flag_def` + %d, `flag_drop` = `flag_drop` + %d, `cp_cap` = `cp_cap` + %d, `cp_block` = `cp_block` + %d WHERE id = %d",
-		GetTime(), GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][p_teleported], scores[client][obj_built], scores[client][obj_destroy], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
+		GetTime(), GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][obj_built], scores[client][obj_destroy], scores[client][p_teleported], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
 	SQL_TQuery(g_DB, OnRowUpdated, query, g_RowID[client]);
 	g_ConnectTime[client] = 0;
 }
@@ -355,7 +355,7 @@ public OnMapEnd() {
 
 			decl String:query[1024];
 			Format(query, sizeof(query), "UPDATE `playerlog` SET `disconnect_time` = %d, `playtime` = `playtime` + %d, `kills` = `kills` + %d, `deaths` = `deaths` + %d, `feigns` = `feigns` + %d, `assists` = `assists` + %d, `dominations` = `dominations` + %d, `revenges` = `revenges` + %d, `headshots` = `headshots` + %d, `backstabs` = `backstabs` + %d, `obj_built` = `obj_built` + %d, `obj_destroy` = `obj_destroy` + %d, `tele_player` = `tele_player` + %d, `flag_pick` = `flag_pick` + %d, `flag_cap` = `flag_cap` + %d, `flag_def` = `flag_def` + %d, `flag_drop` = `flag_drop` + %d, `cp_cap` = `cp_cap` + %d, `cp_block` = `cp_block` + %d WHERE id = %d",
-				GetTime(), GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][p_teleported], scores[client][obj_built], scores[client][obj_destroy], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
+				GetTime(), GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][obj_built], scores[client][obj_destroy], scores[client][p_teleported], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
 			SQL_TQuery(g_DB, OnRowUpdated, query, g_RowID[client]);
 			g_ConnectTime[client] = 0;
 		}
@@ -428,7 +428,10 @@ public Event_player_death(Handle:event, const String:name[], bool:dontBroadcast)
 		return;
 	}
 
-	scores[attacker][kills]++;
+	if (attacker != victim) {
+		scores[attacker][kills]++;
+	}
+
 	scores[victim][deaths]++;
 
 	if (assister != 0) {

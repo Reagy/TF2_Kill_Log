@@ -75,7 +75,6 @@ public Action:Command_OpenRank(client, args) {
 }
 
 public OnPluginEnd() {
-	new Handle:hndl = SQL_CreateTransaction();
 	for (new client = 1; client <= MaxClients; client++) {
 		if (IsClientInGame(client) && !IsFakeClient(client)) {
 			if(g_RowID[client] == -1 || g_ConnectTime[client] == 0) {
@@ -88,11 +87,10 @@ public OnPluginEnd() {
 			decl String:query[1024];
 			Format(query, sizeof(query), "UPDATE `playerlog` SET `disconnect_time` = %d, `playtime` = `playtime` + %d, `kills` = `kills` + %d, `deaths` = `deaths` + %d, `feigns` = `feigns` + %d, `assists` = `assists` + %d, `dominations` = `dominations` + %d, `revenges` = `revenges` + %d, `headshots` = `headshots` + %d, `backstabs` = `backstabs` + %d, `obj_built` = `obj_built` + %d, `obj_destroy` = `obj_destroy` + %d, `tele_player` = `tele_player` + %d, `flag_pick` = `flag_pick` + %d, `flag_cap` = `flag_cap` + %d, `flag_def` = `flag_def` + %d, `flag_drop` = `flag_drop` + %d, `cp_cap` = `cp_cap` + %d, `cp_block` = `cp_block` + %d WHERE id = %d",
 				GetTime(), GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][p_teleported], scores[client][obj_built], scores[client][obj_destroy], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
-			SQL_AddQuery(hndl, query, g_RowID[client]);
+			SQL_TQuery(g_DB, OnRowUpdated, query, g_RowID[client]);
 			g_ConnectTime[client] = 0;
 		}
 	}
-	SQL_ExecuteTransaction(g_DB, hndl);
 }
 
 public hookEvent() {
@@ -345,7 +343,6 @@ public OnConfigsExecuted() {
 }
 
 public OnMapEnd() {
-	new Handle:hndl = SQL_CreateTransaction();
 	for (new client = 1; client <= MaxClients; client++) {
 		if (IsClientInGame(client) && !IsFakeClient(client)) {
 			if(g_RowID[client] == -1 || g_ConnectTime[client] == 0) {
@@ -359,19 +356,10 @@ public OnMapEnd() {
 			decl String:query[1024];
 			Format(query, sizeof(query), "UPDATE `playerlog` SET `disconnect_time` = %d, `playtime` = `playtime` + %d, `kills` = `kills` + %d, `deaths` = `deaths` + %d, `feigns` = `feigns` + %d, `assists` = `assists` + %d, `dominations` = `dominations` + %d, `revenges` = `revenges` + %d, `headshots` = `headshots` + %d, `backstabs` = `backstabs` + %d, `obj_built` = `obj_built` + %d, `obj_destroy` = `obj_destroy` + %d, `tele_player` = `tele_player` + %d, `flag_pick` = `flag_pick` + %d, `flag_cap` = `flag_cap` + %d, `flag_def` = `flag_def` + %d, `flag_drop` = `flag_drop` + %d, `cp_cap` = `cp_cap` + %d, `cp_block` = `cp_block` + %d WHERE id = %d",
 				GetTime(), GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][p_teleported], scores[client][obj_built], scores[client][obj_destroy], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
-			SQL_AddQuery(hndl, query, g_RowID[client]);
+			SQL_TQuery(g_DB, OnRowUpdated, query, g_RowID[client]);
 			g_ConnectTime[client] = 0;
 		}
 	}
-	SQL_ExecuteTransaction(g_DB, hndl, OnSuccess, OnFailure);
-}
-
-public OnSuccess(Handle:db, any:data, numQueries, Handle:results[], any:queryData[]) {
-	return;
-}
-
-public OnFailure(Handle:db, any:data, numQueries, const String:error[], failIndex, any:queryData[]) {
-	LogError("Transaction failed: Queries %i, Error: %s, Index: %i", numQueries, error, failIndex);
 }
 
 public OnRowInserted(Handle:owner, Handle:hndl, const String:error[], any:userid) {
@@ -414,7 +402,6 @@ public Event_player_death(Handle:event, const String:name[], bool:dontBroadcast)
 		return;
 	}
 
-	new Handle:hndl = SQL_CreateTransaction();
 	new String:aID[MAX_LINE_WIDTH];
 	new String:vID[MAX_LINE_WIDTH];
 	new String:asID[MAX_LINE_WIDTH];
@@ -490,7 +477,7 @@ public Event_player_death(Handle:event, const String:name[], bool:dontBroadcast)
 		decl String:buffer[2512];
 		len += Format(buffer[len], sizeof(buffer)-len, "INSERT INTO `killlog` (`attacker`, `ateam`, `aclass`, `victim`, `vteam`, `vclass`, `assister`, `asclass`, `weapon`, `killtime`, `dominated`, `assister_dominated`, `revenge`, `assister_revenge`, `customkill`, `crit`, `wep_ks`, `victim_ks`, `map`)");
 		len += Format(buffer[len], sizeof(buffer)-len, " VALUES ('%s', '%i', '%i', '%s', '%i', '%i', '%s', '%i', '%s', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%s');",aID,attackerteam,attackerclass,vID,victimteam,victimclass,asID,assisterclass,weapon,GetTime(),df_killerdomination,df_assisterdomination,df_killerrevenge,df_assisterrevenge,customkill,dmg_crit,killstreak_wep,killstreak,map);	
-		SQL_AddQuery(hndl, buffer);
+		SQL_TQuery(g_DB, SQLError, buffer);
 	}
 
 	if (attacker != victim) {
@@ -498,16 +485,14 @@ public Event_player_death(Handle:event, const String:name[], bool:dontBroadcast)
 		decl String:buffer2[1024];
 		len2 += Format(buffer2[len2], sizeof(buffer2)-len2, "INSERT INTO `smalllog` (`attacker`, `weapon`, `kills`, `crits`, `ks`, `customkill`)");
 		len2 += Format(buffer2[len2], sizeof(buffer2)-len2, " VALUES ('%s', '%s', '%i', '%i', '%i', '%i') ON DUPLICATE KEY UPDATE `kills` = `kills` + 1, `crits` = `crits` + %i, `ks` = GREATEST(`ks`,VALUES(`ks`));",aID,weapon,1,dmg_crit,killstreak_wep,customkill,dmg_crit);
-		SQL_AddQuery(hndl, buffer2);
+		SQL_TQuery(g_DB, SQLError, buffer2);
 	}
 
 	new len3 = 0;
 	decl String:buffer3[1024];
 	len3 += Format(buffer3[len3], sizeof(buffer3)-len3, "INSERT INTO `smalllog` (`attacker`, `weapon`, `deaths`, `customkill`)");
 	len3 += Format(buffer3[len3], sizeof(buffer3)-len3, " VALUES ('%s', '%s', '%i', '%i') ON DUPLICATE KEY UPDATE `deaths` = `deaths` + 1;",vID,weapon,1,customkill);
-	SQL_AddQuery(hndl, buffer3);
-
-	SQL_ExecuteTransaction(g_DB, hndl, OnSuccess, OnFailure);
+	SQL_TQuery(g_DB, SQLError, buffer3);
 }
 
 public Action:Event_player_teleported(Handle:event, const String:name[], bool:dontBroadcast) {

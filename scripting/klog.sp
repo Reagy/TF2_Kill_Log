@@ -6,7 +6,7 @@
 #include <tf2_stocks>
 #include <geoip>
 
-#define PLUGIN_VERSION "0.7.6"
+#define PLUGIN_VERSION "0.7.5"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 
@@ -17,6 +17,17 @@ new Handle:g_URL = INVALID_HANDLE;
 new bool:g_ExLogEnabled = false;
 new g_ConnectTime[MAXPLAYERS + 1];
 new g_RowID[MAXPLAYERS + 1] = {-1, ...};
+new g_MapTime = 0;
+new g_MapKills = 0;
+new g_MapAssists = 0;
+new g_MapDoms = 0;
+new g_MapRevs = 0;
+new g_MapFP = 0;
+new g_MapFC = 0;
+new g_MapFD = 0;
+new g_MapFDrop = 0;
+new g_MapCPP = 0;
+new g_MapCPB = 0;
 
 enum _:playerTracker {
 	kills,
@@ -76,11 +87,22 @@ public Action:Command_OpenRank(client, args) {
 
 public OnPluginEnd() {
 	for (new client = 1; client <= MaxClients; client++) {
+		g_MapKills += scores[client][kills];
+		g_MapAssists += scores[client][assists];
+		g_MapDoms += scores[client][dominations];
+		g_MapRevs += scores[client][revenges];
+		g_MapFP += scores[client][flag_pick];
+		g_MapFC += scores[client][flag_cap];
+		g_MapFD += scores[client][flag_def];
+		g_MapFDrop += scores[client][flag_drop];
+		g_MapCPP += scores[client][cp_captured];
+		g_MapCPB += scores[client][cp_blocked];
 		if (IsClientInGame(client) && !IsFakeClient(client)) {
 			if(g_RowID[client] == -1 || g_ConnectTime[client] == 0) {
 				g_ConnectTime[client] = 0;
 				return;
 			}
+
 			new String:auth[32];
 			GetClientAuthString(client, auth, sizeof(auth[]));
 
@@ -91,6 +113,15 @@ public OnPluginEnd() {
 			g_ConnectTime[client] = 0;
 		}
 	}
+
+	new String:mapName[MAX_LINE_WIDTH];
+	GetCurrentMap(mapName,MAX_LINE_WIDTH);
+	g_MapTime = GetTime() - g_MapTime;
+	decl String:query2[2048];
+	Format(query2, sizeof(query2), "INSERT INTO `maplog` SET `name` = '%s', `kills` = %i, `assists` = %i, `dominations` = %i, `revenges` = %i, `flag_pick` = %i, `flag_cap` = %i, `flag_def` = %i, `flag_drop` = %i, `cp_captured` = %i, `cp_blocked` = %i, `playtime` = %i ON DUPLICATE KEY UPDATE `kills` = `kills` +%i, `assists` = `assists` + %i, `dominations` = `dominations` +%i, `revenges` = `revenges` + %i, `flag_pick` = `flag_pick` +%i, `flag_cap` = `flag_cap` +%i, `flag_def` = `flag_def` +%i, `flag_drop` = `flag_drop` + %i, `cp_captured` = `cp_captured` + %i, `cp_blocked` = `cp_blocked` + %i, `playtime` = `playtime` + %d", 
+		mapName, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapTime, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapTime);
+	SQL_TQuery(g_DB, OnRowUpdated, query2);
+	PurgeMap();
 }
 
 public hookEvent() {
@@ -120,6 +151,7 @@ public connectDB(Handle:owner, Handle:hndl, const String:error[], any:data) {
 		createDBPlayerLog();
 		createDBTeamLog();
 		createDBObjectLog();
+		createDBMapLog();
 	}
 }
 
@@ -261,10 +293,33 @@ createDBObjectLog() {
 	SQL_FastQuery(g_DB, query);
 }
 
+createDBMapLog() {
+	new len = 0;
+	decl String:query[1024];
+	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `maplog` (");
+	len += Format(query[len], sizeof(query)-len, "`name` varchar(32) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`kills` int(11) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`assists` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`dominations` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`revenges` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_pick` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_cap` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_def` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_drop` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`cp_captured` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`cp_blocked` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`playtime` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "UNIQUE KEY `name` (`name`)");
+	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+	SQL_FastQuery(g_DB, query);
+}
+
+
 public OnClientConnected(client) {
 	if(IsFakeClient(client)) {
 		return;
 	}
+
 	g_ConnectTime[client] = GetTime();
 	g_RowID[client] = -1;
 }
@@ -324,6 +379,17 @@ public OnClientDisconnect(client) {
 		return;
 	}
 
+	g_MapKills += scores[client][kills];
+	g_MapAssists += scores[client][assists];
+	g_MapDoms += scores[client][dominations];
+	g_MapRevs += scores[client][revenges];
+	g_MapFP += scores[client][flag_pick];
+	g_MapFC += scores[client][flag_cap];
+	g_MapFD += scores[client][flag_def];
+	g_MapFDrop += scores[client][flag_drop];
+	g_MapCPP += scores[client][cp_captured];
+	g_MapCPB += scores[client][cp_blocked];
+
 	new String:auth[32];
 	GetClientAuthString(client, auth, sizeof(auth[]));
 
@@ -335,7 +401,7 @@ public OnClientDisconnect(client) {
 }
 
 public OnMapStart() {
-
+	g_MapTime = GetTime();
 }
 
 public OnConfigsExecuted() {
@@ -344,6 +410,17 @@ public OnConfigsExecuted() {
 
 public OnMapEnd() {
 	for (new client = 1; client <= MaxClients; client++) {
+		g_MapKills += scores[client][kills];
+		g_MapAssists += scores[client][assists];
+		g_MapDoms += scores[client][dominations];
+		g_MapRevs += scores[client][revenges];
+		g_MapFP += scores[client][flag_pick];
+		g_MapFC += scores[client][flag_cap];
+		g_MapFD += scores[client][flag_def];
+		g_MapFDrop += scores[client][flag_drop];
+		g_MapCPP += scores[client][cp_captured];
+		g_MapCPB += scores[client][cp_blocked];
+		
 		if (IsClientInGame(client) && !IsFakeClient(client)) {
 			if(g_RowID[client] == -1 || g_ConnectTime[client] == 0) {
 				g_ConnectTime[client] = 0;
@@ -360,6 +437,15 @@ public OnMapEnd() {
 			g_ConnectTime[client] = 0;
 		}
 	}
+
+	new String:mapName[MAX_LINE_WIDTH];
+	GetCurrentMap(mapName,MAX_LINE_WIDTH);
+	g_MapTime = GetTime() - g_MapTime;
+	decl String:query2[2048];
+	Format(query2, sizeof(query2), "INSERT INTO `maplog` SET `name` = '%s', `kills` = %i, `assists` = %i, `dominations` = %i, `revenges` = %i, `flag_pick` = %i, `flag_cap` = %i, `flag_def` = %i, `flag_drop` = %i, `cp_captured` = %i, `cp_blocked` = %i, `playtime` = %i ON DUPLICATE KEY UPDATE `kills` = `kills` +%i, `assists` = `assists` + %i, `dominations` = `dominations` +%i, `revenges` = `revenges` + %i, `flag_pick` = `flag_pick` +%i, `flag_cap` = `flag_cap` +%i, `flag_def` = `flag_def` +%i, `flag_drop` = `flag_drop` + %i, `cp_captured` = `cp_captured` + %i, `cp_blocked` = `cp_blocked` + %i, `playtime` = `playtime` + %d", 
+		mapName, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapTime, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapTime);
+	SQL_TQuery(g_DB, OnRowUpdated, query2);
+	PurgeMap();
 }
 
 public OnRowInserted(Handle:owner, Handle:hndl, const String:error[], any:userid) {
@@ -537,6 +623,7 @@ public Action:Event_object_destroyed(Handle:event, const String:name[], bool:don
 	new obj_index = GetEventInt(event, "index");
 	new lvl = GetEntProp(obj_index, Prop_Send, "m_iUpgradeLevel");
 	new bool:mini = (GetEntProp(obj_index, Prop_Send, "m_bMiniBuilding") == 1);
+
 	if (object == 0) {
 		object_name = "dispenser";
 		scores[attacker][obj_destroy]++;
@@ -680,4 +767,18 @@ PurgeClient(clientId) {
 	scores[clientId][flag_drop] = 0;
 	scores[clientId][cp_captured] = 0;
 	scores[clientId][cp_blocked] = 0;
+}
+
+PurgeMap() {
+	g_MapTime = 0;
+	g_MapKills = 0;
+	g_MapAssists = 0;
+	g_MapDoms = 0;
+	g_MapRevs = 0;
+	g_MapFP = 0;
+	g_MapFC = 0;
+	g_MapFD = 0;
+	g_MapFDrop = 0;
+	g_MapCPP = 0;
+	g_MapCPB = 0;
 }

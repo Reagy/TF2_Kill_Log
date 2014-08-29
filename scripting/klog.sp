@@ -6,7 +6,7 @@
 #include <tf2_stocks>
 #include <geoip>
 
-#define PLUGIN_VERSION "0.7.5"
+#define PLUGIN_VERSION "0.8.1"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 
@@ -18,6 +18,7 @@ new bool:g_ExLogEnabled = false;
 new g_ConnectTime[MAXPLAYERS + 1];
 new g_RowID[MAXPLAYERS + 1] = {-1, ...};
 new g_MapTime = 0;
+new g_MapPlaytime = 0;
 new g_MapKills = 0;
 new g_MapAssists = 0;
 new g_MapDoms = 0;
@@ -116,12 +117,11 @@ public OnPluginEnd() {
 
 	new String:mapName[MAX_LINE_WIDTH];
 	GetCurrentMap(mapName,MAX_LINE_WIDTH);
-	g_MapTime = GetTime() - g_MapTime;
+	g_MapPlaytime = GetTime() - g_MapTime;
 	decl String:query2[2048];
 	Format(query2, sizeof(query2), "INSERT INTO `maplog` SET `name` = '%s', `kills` = %i, `assists` = %i, `dominations` = %i, `revenges` = %i, `flag_pick` = %i, `flag_cap` = %i, `flag_def` = %i, `flag_drop` = %i, `cp_captured` = %i, `cp_blocked` = %i, `playtime` = %i ON DUPLICATE KEY UPDATE `kills` = `kills` +%i, `assists` = `assists` + %i, `dominations` = `dominations` +%i, `revenges` = `revenges` + %i, `flag_pick` = `flag_pick` +%i, `flag_cap` = `flag_cap` +%i, `flag_def` = `flag_def` +%i, `flag_drop` = `flag_drop` + %i, `cp_captured` = `cp_captured` + %i, `cp_blocked` = `cp_blocked` + %i, `playtime` = `playtime` + %d", 
-		mapName, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapTime, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapTime);
+		mapName, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapPlaytime, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapPlaytime);
 	SQL_TQuery(g_DB, OnRowUpdated, query2);
-	PurgeMap();
 }
 
 public hookEvent() {
@@ -152,6 +152,8 @@ public connectDB(Handle:owner, Handle:hndl, const String:error[], any:data) {
 		createDBTeamLog();
 		createDBObjectLog();
 		createDBMapLog();
+		updateTime();
+		CreateTimer(300.0, Timer_HandleUpdate, INVALID_HANDLE, TIMER_REPEAT);
 	}
 }
 
@@ -166,154 +168,6 @@ public SQLError(Handle:owner, Handle:hndl, const String:error[], any:data) {
 		LogMessage("SQL Error: %s", error);
 	}
 }
-
-createDBKillLog() {
-	new len = 0;
-	decl String:query[1024];
-	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `killlog` (");
-	len += Format(query[len], sizeof(query)-len, "`attacker` VARCHAR( 20 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`ateam` TINYINT( 1 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`aclass` TINYINT( 1 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`victim` VARCHAR( 20 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`vteam` TINYINT( 1 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`vclass` TINYINT( 1 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`assister` VARCHAR( 20 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`asclass` TINYINT( 1 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`weapon` VARCHAR( 25 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`killtime` INT( 11 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`dominated` BOOL NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`assister_dominated` BOOL NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`revenge` BOOL NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`assister_revenge` BOOL NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`customkill` TINYINT( 2 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`crit` TINYINT( 2 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`wep_ks` TINYINT( 3 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`victim_ks` TINYINT( 3 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`map` VARCHAR( 36 ) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "KEY `attacker` (`attacker`),");
-	len += Format(query[len], sizeof(query)-len, "KEY `victim` (`victim`),");
-	len += Format(query[len], sizeof(query)-len, "KEY `assister` (`assister`),");
-	len += Format(query[len], sizeof(query)-len, "KEY `weapon` (`weapon`),");
-	len += Format(query[len], sizeof(query)-len, "KEY `killtime` (`killtime`),");
-	len += Format(query[len], sizeof(query)-len, "KEY `map` (`map`))");
-	len += Format(query[len], sizeof(query)-len, "ENGINE = InnoDB DEFAULT CHARSET=utf8;");
-	SQL_FastQuery(g_DB, query);
-}
-
-createDBSmallLog() {
-	new len = 0;
-	decl String:query[512];
-	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `smalllog` (");
-	len += Format(query[len], sizeof(query)-len, "`attacker` varchar(20) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`weapon` varchar(25) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`kills` int(11) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`deaths` int(11) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`crits` int(11) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`ks` int(11) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`customkill` tinyint(2) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, "UNIQUE KEY `attacker` (`attacker`,`weapon`,`customkill`)");
-	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-	SQL_FastQuery(g_DB, query);
-}
-
-createDBPlayerLog() {
-	new len = 0;
-	decl String:query[1024];
-	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `playerlog` (");
-	len += Format(query[len], sizeof(query)-len, "`id` int(11) NOT NULL AUTO_INCREMENT,"); 
-	len += Format(query[len], sizeof(query)-len, "`name` varchar(32),");
-	len += Format(query[len], sizeof(query)-len, "`auth` varchar(32),");
-	len += Format(query[len], sizeof(query)-len, "`ip` varchar(32),");
-	len += Format(query[len], sizeof(query)-len, "`cc` varchar(2),");
-	len += Format(query[len], sizeof(query)-len, "`connect_time` int(11),");
-	len += Format(query[len], sizeof(query)-len, "`disconnect_time` int(11),");
-	len += Format(query[len], sizeof(query)-len, "`playtime` int(11) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`kills` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`deaths` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`assists` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`feigns` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`dominations` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`revenges` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`headshots` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`backstabs` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`obj_built` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`obj_destroy` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`tele_player` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`flag_pick` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`flag_cap` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`flag_def` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`flag_drop` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`cp_cap` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`cp_block` int(6) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "PRIMARY KEY (`id`), UNIQUE KEY `auth` (`auth`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8;");
-	SQL_FastQuery(g_DB, query);
-}
-
-createDBTeamLog() {
-	new len = 0;
-	decl String:query[1024];
-	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `teamlog` (");
-	len += Format(query[len], sizeof(query)-len, " `capper` varchar(20) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, " `cteam` tinyint(1) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, " `cclass` tinyint(1) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, " `defender` varchar(20) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, " `dteam` tinyint(1) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, " `dclass` tinyint(1) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, " `killtime` int(11) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, " `event` varchar(20) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, " `map` varchar(32) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, " KEY `capper` (`capper`),");
-	len += Format(query[len], sizeof(query)-len, " KEY `defender` (`defender`),");
-	len += Format(query[len], sizeof(query)-len, " KEY `killtime` (`killtime`),");
-	len += Format(query[len], sizeof(query)-len, " KEY `event` (`event`),");
-	len += Format(query[len], sizeof(query)-len, " KEY `map` (`map`)");
-	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-	SQL_FastQuery(g_DB, query);
-}
-
-createDBObjectLog() {
-	new len = 0;
-	decl String:query[1024];
-	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `objectlog` (");
-	len += Format(query[len], sizeof(query)-len, "`attacker` varchar(20) CHARACTER SET utf8 NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`ateam` tinyint(1) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`aclass` tinyint(1) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`victim` varchar(20) CHARACTER SET utf8 NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`vteam` tinyint(1) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`vclass` tinyint(1) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`weapon` varchar(25) CHARACTER SET utf8 NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`killtime` int(11) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`object` varchar(25) CHARACTER SET utf8 NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, " KEY `attacker` (`attacker`),");
-	len += Format(query[len], sizeof(query)-len, " KEY `victim` (`victim`),");
-	len += Format(query[len], sizeof(query)-len, " KEY `weapon` (`weapon`),");
-	len += Format(query[len], sizeof(query)-len, " KEY `killtime` (`killtime`),");
-	len += Format(query[len], sizeof(query)-len, " KEY `object` (`object`)");
-	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-	SQL_FastQuery(g_DB, query);
-}
-
-createDBMapLog() {
-	new len = 0;
-	decl String:query[1024];
-	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `maplog` (");
-	len += Format(query[len], sizeof(query)-len, "`name` varchar(32) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`kills` int(11) NOT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`assists` int(11) NOT NULL DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`dominations` int(11) NOT NULL DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`revenges` int(11) NOT NULL DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`flag_pick` int(11) NOT NULL DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`flag_cap` int(11) NOT NULL DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`flag_def` int(11) NOT NULL DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`flag_drop` int(11) NOT NULL DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`cp_captured` int(11) NOT NULL DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`cp_blocked` int(11) NOT NULL DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`playtime` int(11) NOT NULL DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "UNIQUE KEY `name` (`name`)");
-	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-	SQL_FastQuery(g_DB, query);
-}
-
 
 public OnClientConnected(client) {
 	if(IsFakeClient(client)) {
@@ -371,6 +225,12 @@ public Action:Timer_HandleConnect(Handle:timer, any:userid) {
 		escapedBuffers[0], escapedBuffers[1], ip, escapedBuffers[2], g_ConnectTime[client],escapedBuffers[0], escapedBuffers[1], ip, escapedBuffers[2], g_ConnectTime[client]);
 	SQL_TQuery(g_DB, OnRowInserted, query, GetClientUserId(client));
 	return Plugin_Stop;
+}
+
+public Action:Timer_HandleUpdate(Handle:timer)
+{
+	updateClients();
+	return Plugin_Continue;
 }
 
 public OnClientDisconnect(client) {
@@ -440,12 +300,14 @@ public OnMapEnd() {
 
 	new String:mapName[MAX_LINE_WIDTH];
 	GetCurrentMap(mapName,MAX_LINE_WIDTH);
-	g_MapTime = GetTime() - g_MapTime;
+	g_MapPlaytime = GetTime() - g_MapTime;
 	decl String:query2[2048];
 	Format(query2, sizeof(query2), "INSERT INTO `maplog` SET `name` = '%s', `kills` = %i, `assists` = %i, `dominations` = %i, `revenges` = %i, `flag_pick` = %i, `flag_cap` = %i, `flag_def` = %i, `flag_drop` = %i, `cp_captured` = %i, `cp_blocked` = %i, `playtime` = %i ON DUPLICATE KEY UPDATE `kills` = `kills` +%i, `assists` = `assists` + %i, `dominations` = `dominations` +%i, `revenges` = `revenges` + %i, `flag_pick` = `flag_pick` +%i, `flag_cap` = `flag_cap` +%i, `flag_def` = `flag_def` +%i, `flag_drop` = `flag_drop` + %i, `cp_captured` = `cp_captured` + %i, `cp_blocked` = `cp_blocked` + %i, `playtime` = `playtime` + %d", 
-		mapName, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapTime, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapTime);
+		mapName, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapPlaytime, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapPlaytime);
 	SQL_TQuery(g_DB, OnRowUpdated, query2);
 	PurgeMap();
+	g_MapTime = 0;
+	g_MapPlaytime = 0;
 }
 
 public OnRowInserted(Handle:owner, Handle:hndl, const String:error[], any:userid) {
@@ -749,6 +611,45 @@ public Action:Event_teamplay_capture_blocked(Handle:event, const String:name[], 
 	}
 }
 
+updateClients(){
+	for (new client = 1; client <= MaxClients; client++) {
+		g_MapKills += scores[client][kills];
+		g_MapAssists += scores[client][assists];
+		g_MapDoms += scores[client][dominations];
+		g_MapRevs += scores[client][revenges];
+		g_MapFP += scores[client][flag_pick];
+		g_MapFC += scores[client][flag_cap];
+		g_MapFD += scores[client][flag_def];
+		g_MapFDrop += scores[client][flag_drop];
+		g_MapCPP += scores[client][cp_captured];
+		g_MapCPB += scores[client][cp_blocked];
+		
+		if (IsClientInGame(client) && !IsFakeClient(client)) {
+			if(g_RowID[client] == -1 || g_ConnectTime[client] == 0) {
+				g_ConnectTime[client] = 0;
+				return;
+			}
+
+			new String:auth[32];
+			GetClientAuthString(client, auth, sizeof(auth[]));
+
+			decl String:query[1024];
+			Format(query, sizeof(query), "UPDATE `playerlog` SET `playtime` = `playtime` + %d, `kills` = `kills` + %d, `deaths` = `deaths` + %d, `feigns` = `feigns` + %d, `assists` = `assists` + %d, `dominations` = `dominations` + %d, `revenges` = `revenges` + %d, `headshots` = `headshots` + %d, `backstabs` = `backstabs` + %d, `obj_built` = `obj_built` + %d, `obj_destroy` = `obj_destroy` + %d, `tele_player` = `tele_player` + %d, `flag_pick` = `flag_pick` + %d, `flag_cap` = `flag_cap` + %d, `flag_def` = `flag_def` + %d, `flag_drop` = `flag_drop` + %d, `cp_cap` = `cp_cap` + %d, `cp_block` = `cp_block` + %d WHERE id = %d",
+				GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][obj_built], scores[client][obj_destroy], scores[client][p_teleported], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
+			SQL_TQuery(g_DB, OnRowUpdated, query, g_RowID[client]);
+		}
+		PurgeClient(client);
+	}
+
+	new String:mapName[MAX_LINE_WIDTH];
+	GetCurrentMap(mapName,MAX_LINE_WIDTH);
+	decl String:query2[2048];
+	Format(query2, sizeof(query2), "INSERT INTO `maplog` SET `name` = '%s', `kills` = %i, `assists` = %i, `dominations` = %i, `revenges` = %i, `flag_pick` = %i, `flag_cap` = %i, `flag_def` = %i, `flag_drop` = %i, `cp_captured` = %i, `cp_blocked` = %i ON DUPLICATE KEY UPDATE `kills` = `kills` +%i, `assists` = `assists` + %i, `dominations` = `dominations` +%i, `revenges` = `revenges` + %i, `flag_pick` = `flag_pick` +%i, `flag_cap` = `flag_cap` +%i, `flag_def` = `flag_def` +%i, `flag_drop` = `flag_drop` + %i, `cp_captured` = `cp_captured` + %i, `cp_blocked` = `cp_blocked` + %i", 
+		mapName, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB);
+	SQL_TQuery(g_DB, OnRowUpdated, query2);
+	PurgeMap();
+}
+
 PurgeClient(clientId) {
 	scores[clientId][kills] = 0;
 	scores[clientId][deaths] = 0;
@@ -770,7 +671,6 @@ PurgeClient(clientId) {
 }
 
 PurgeMap() {
-	g_MapTime = 0;
 	g_MapKills = 0;
 	g_MapAssists = 0;
 	g_MapDoms = 0;
@@ -781,4 +681,155 @@ PurgeMap() {
 	g_MapFDrop = 0;
 	g_MapCPP = 0;
 	g_MapCPB = 0;
+}
+
+createDBKillLog() {
+	new len = 0;
+	decl String:query[1024];
+	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `killlog` (");
+	len += Format(query[len], sizeof(query)-len, "`attacker` VARCHAR( 20 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`ateam` TINYINT( 1 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`aclass` TINYINT( 1 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`victim` VARCHAR( 20 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`vteam` TINYINT( 1 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`vclass` TINYINT( 1 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`assister` VARCHAR( 20 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`asclass` TINYINT( 1 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`weapon` VARCHAR( 25 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`killtime` INT( 11 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`dominated` BOOL NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`assister_dominated` BOOL NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`revenge` BOOL NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`assister_revenge` BOOL NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`customkill` TINYINT( 2 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`crit` TINYINT( 2 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`wep_ks` TINYINT( 3 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`victim_ks` TINYINT( 3 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`map` VARCHAR( 36 ) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "KEY `attacker` (`attacker`),");
+	len += Format(query[len], sizeof(query)-len, "KEY `victim` (`victim`),");
+	len += Format(query[len], sizeof(query)-len, "KEY `assister` (`assister`),");
+	len += Format(query[len], sizeof(query)-len, "KEY `weapon` (`weapon`),");
+	len += Format(query[len], sizeof(query)-len, "KEY `killtime` (`killtime`),");
+	len += Format(query[len], sizeof(query)-len, "KEY `map` (`map`))");
+	len += Format(query[len], sizeof(query)-len, "ENGINE = InnoDB DEFAULT CHARSET=utf8;");
+	SQL_FastQuery(g_DB, query);
+}
+
+createDBSmallLog() {
+	new len = 0;
+	decl String:query[512];
+	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `smalllog` (");
+	len += Format(query[len], sizeof(query)-len, "`attacker` varchar(20) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`weapon` varchar(25) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`kills` int(11) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`deaths` int(11) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`crits` int(11) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`ks` int(11) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`customkill` tinyint(2) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, "UNIQUE KEY `attacker` (`attacker`,`weapon`,`customkill`)");
+	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+	SQL_FastQuery(g_DB, query);
+}
+
+createDBPlayerLog() {
+	new len = 0;
+	decl String:query[1024];
+	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `playerlog` (");
+	len += Format(query[len], sizeof(query)-len, "`id` int(11) NOT NULL AUTO_INCREMENT,"); 
+	len += Format(query[len], sizeof(query)-len, "`name` varchar(32),");
+	len += Format(query[len], sizeof(query)-len, "`auth` varchar(32),");
+	len += Format(query[len], sizeof(query)-len, "`ip` varchar(32),");
+	len += Format(query[len], sizeof(query)-len, "`cc` varchar(2),");
+	len += Format(query[len], sizeof(query)-len, "`connect_time` int(11),");
+	len += Format(query[len], sizeof(query)-len, "`disconnect_time` int(11),");
+	len += Format(query[len], sizeof(query)-len, "`playtime` int(11) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`kills` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`deaths` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`assists` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`feigns` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`dominations` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`revenges` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`headshots` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`backstabs` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`obj_built` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`obj_destroy` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`tele_player` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_pick` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_cap` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_def` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_drop` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`cp_cap` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`cp_block` int(6) DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "PRIMARY KEY (`id`), UNIQUE KEY `auth` (`auth`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8;");
+	SQL_FastQuery(g_DB, query);
+}
+
+createDBTeamLog() {
+	new len = 0;
+	decl String:query[1024];
+	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `teamlog` (");
+	len += Format(query[len], sizeof(query)-len, " `capper` varchar(20) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, " `cteam` tinyint(1) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, " `cclass` tinyint(1) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, " `defender` varchar(20) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, " `dteam` tinyint(1) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, " `dclass` tinyint(1) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, " `killtime` int(11) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, " `event` varchar(20) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, " `map` varchar(32) DEFAULT NULL,");
+	len += Format(query[len], sizeof(query)-len, " KEY `capper` (`capper`),");
+	len += Format(query[len], sizeof(query)-len, " KEY `defender` (`defender`),");
+	len += Format(query[len], sizeof(query)-len, " KEY `killtime` (`killtime`),");
+	len += Format(query[len], sizeof(query)-len, " KEY `event` (`event`),");
+	len += Format(query[len], sizeof(query)-len, " KEY `map` (`map`)");
+	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+	SQL_FastQuery(g_DB, query);
+}
+
+createDBObjectLog() {
+	new len = 0;
+	decl String:query[1024];
+	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `objectlog` (");
+	len += Format(query[len], sizeof(query)-len, "`attacker` varchar(20) CHARACTER SET utf8 NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`ateam` tinyint(1) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`aclass` tinyint(1) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`victim` varchar(20) CHARACTER SET utf8 NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`vteam` tinyint(1) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`vclass` tinyint(1) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`weapon` varchar(25) CHARACTER SET utf8 NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`killtime` int(11) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`object` varchar(25) CHARACTER SET utf8 NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, " KEY `attacker` (`attacker`),");
+	len += Format(query[len], sizeof(query)-len, " KEY `victim` (`victim`),");
+	len += Format(query[len], sizeof(query)-len, " KEY `weapon` (`weapon`),");
+	len += Format(query[len], sizeof(query)-len, " KEY `killtime` (`killtime`),");
+	len += Format(query[len], sizeof(query)-len, " KEY `object` (`object`)");
+	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+	SQL_FastQuery(g_DB, query);
+}
+
+createDBMapLog() {
+	new len = 0;
+	decl String:query[1024];
+	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `maplog` (");
+	len += Format(query[len], sizeof(query)-len, "`name` varchar(32) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`kills` int(11) NOT NULL,");
+	len += Format(query[len], sizeof(query)-len, "`assists` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`dominations` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`revenges` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_pick` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_cap` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_def` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`flag_drop` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`cp_captured` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`cp_blocked` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "`playtime` int(11) NOT NULL DEFAULT '0',");
+	len += Format(query[len], sizeof(query)-len, "UNIQUE KEY `name` (`name`)");
+	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+	SQL_FastQuery(g_DB, query);
+}
+
+updateTime() {
+	SQL_FastQuery(g_DB, "UPDATE `playerlog` SET disconnect_time = UNIX_TIMESTAMP(NOW()) WHERE disconnect_time = 0");
 }

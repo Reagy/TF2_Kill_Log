@@ -6,7 +6,7 @@
 #include <tf2_stocks>
 #include <geoip>
 
-#define PLUGIN_VERSION "0.8.1"
+#define PLUGIN_VERSION "0.8.2"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 
@@ -639,6 +639,7 @@ updateClients(){
 			SQL_TQuery(g_DB, OnRowUpdated, query, g_RowID[client]);
 		}
 		PurgeClient(client);
+		g_ConnectTime[client] = GetTime();
 	}
 
 	new String:mapName[MAX_LINE_WIDTH];

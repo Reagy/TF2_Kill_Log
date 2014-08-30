@@ -256,7 +256,7 @@ class SSP {
             }
         }
         else{
-            $query =  "SELECT SQL_CALC_FOUND_ROWS `".implode("`, `", SSP::pluck($columns, 'db'))."`
+            $query =  "SELECT SQL_CALC_FOUND_ROWS ".implode(", ", SSP::pluck($columns, 'db'))."
 			 FROM `$table`
 			 $where
 			 $extraWhere

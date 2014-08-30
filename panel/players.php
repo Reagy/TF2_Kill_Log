@@ -10,6 +10,8 @@
 							<th>Kills</th>
 							<th>Deaths</th>
 							<th>Assists</th>
+							<th>KPD</th>
+							<th>KPM</th>
 							<th>Playtime</th>
 							<th>Last On</th>
 						</tr>
@@ -36,6 +38,8 @@ $(document).ready(function() {
 			{ "data": "kills" },
 			{ "data": "deaths" },
 			{ "data": "assists" },
+			{ "data": "kpd" },
+			{ "data": "kpm" },
 			{ "data": "playtime" },
 			{ "data": "disconnect_time" }
 		],

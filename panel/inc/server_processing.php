@@ -149,6 +149,14 @@ if (isset($_GET['type']) && $_GET['type'] == 'getplayers') {
             'dt'        => 'assists'
         ),
         array(
+            'db'        => 'ROUND(kills/deaths,2)',
+            'dt'        => 'kpd'
+        ),
+        array(
+            'db'        => 'ROUND(kills/(playtime/60),2)',
+            'dt'        => 'kpm'
+        ),
+        array(
             'db'        => 'playtime',
             'dt'        => 'playtime',
             'formatter' => function( $d, $row ) {
@@ -159,7 +167,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'getplayers') {
             'db'        => 'disconnect_time',
             'dt'        => 'disconnect_time',
             'formatter' => function( $d, $row ) {
-                return date( 'F j, Y, g:i a', $d);
+                return ($d == 0 ? "Connected" : date( 'F j, Y, g:i a', $d));
             }
         )
     );
@@ -284,10 +292,11 @@ if (isset($_GET['type']) && $_GET['type'] == 'getstreak') {
 
     $extraCondition = "`weapon` = '".$_GET['id']."' AND `ks` > 0";
     $joinQuery = "FROM `smalllog` INNER JOIN `playerlog` ON (smalllog.`attacker` = playerlog.`auth`)";
+    $groupBy = "GROUP BY smalllog.`attacker`, smalllog.`weapon`";
 
     require('ssp.class.php');
 
     echo json_encode(
-        SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraCondition)
+        SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraCondition, $groupBy)
     );
 }

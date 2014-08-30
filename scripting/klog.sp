@@ -88,16 +88,6 @@ public Action:Command_OpenRank(client, args) {
 
 public OnPluginEnd() {
 	for (new client = 1; client <= MaxClients; client++) {
-		g_MapKills += scores[client][kills];
-		g_MapAssists += scores[client][assists];
-		g_MapDoms += scores[client][dominations];
-		g_MapRevs += scores[client][revenges];
-		g_MapFP += scores[client][flag_pick];
-		g_MapFC += scores[client][flag_cap];
-		g_MapFD += scores[client][flag_def];
-		g_MapFDrop += scores[client][flag_drop];
-		g_MapCPP += scores[client][cp_captured];
-		g_MapCPB += scores[client][cp_blocked];
 		if (IsClientInGame(client) && !IsFakeClient(client)) {
 			if(g_RowID[client] == -1 || g_ConnectTime[client] == 0) {
 				g_ConnectTime[client] = 0;
@@ -111,7 +101,6 @@ public OnPluginEnd() {
 			Format(query, sizeof(query), "UPDATE `playerlog` SET `disconnect_time` = %d, `playtime` = `playtime` + %d, `kills` = `kills` + %d, `deaths` = `deaths` + %d, `feigns` = `feigns` + %d, `assists` = `assists` + %d, `dominations` = `dominations` + %d, `revenges` = `revenges` + %d, `headshots` = `headshots` + %d, `backstabs` = `backstabs` + %d, `obj_built` = `obj_built` + %d, `obj_destroy` = `obj_destroy` + %d, `tele_player` = `tele_player` + %d, `flag_pick` = `flag_pick` + %d, `flag_cap` = `flag_cap` + %d, `flag_def` = `flag_def` + %d, `flag_drop` = `flag_drop` + %d, `cp_cap` = `cp_cap` + %d, `cp_block` = `cp_block` + %d WHERE id = %d",
 				GetTime(), GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][obj_built], scores[client][obj_destroy], scores[client][p_teleported], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
 			SQL_TQuery(g_DB, OnRowUpdated, query, g_RowID[client]);
-			g_ConnectTime[client] = 0;
 		}
 	}
 
@@ -229,7 +218,7 @@ public Action:Timer_HandleConnect(Handle:timer, any:userid) {
 
 public Action:Timer_HandleUpdate(Handle:timer)
 {
-	updateClients();
+	updateMap();
 	return Plugin_Continue;
 }
 
@@ -238,17 +227,6 @@ public OnClientDisconnect(client) {
 		g_ConnectTime[client] = 0;
 		return;
 	}
-
-	g_MapKills += scores[client][kills];
-	g_MapAssists += scores[client][assists];
-	g_MapDoms += scores[client][dominations];
-	g_MapRevs += scores[client][revenges];
-	g_MapFP += scores[client][flag_pick];
-	g_MapFC += scores[client][flag_cap];
-	g_MapFD += scores[client][flag_def];
-	g_MapFDrop += scores[client][flag_drop];
-	g_MapCPP += scores[client][cp_captured];
-	g_MapCPB += scores[client][cp_blocked];
 
 	new String:auth[32];
 	GetClientAuthString(client, auth, sizeof(auth[]));
@@ -270,17 +248,6 @@ public OnConfigsExecuted() {
 
 public OnMapEnd() {
 	for (new client = 1; client <= MaxClients; client++) {
-		g_MapKills += scores[client][kills];
-		g_MapAssists += scores[client][assists];
-		g_MapDoms += scores[client][dominations];
-		g_MapRevs += scores[client][revenges];
-		g_MapFP += scores[client][flag_pick];
-		g_MapFC += scores[client][flag_cap];
-		g_MapFD += scores[client][flag_def];
-		g_MapFDrop += scores[client][flag_drop];
-		g_MapCPP += scores[client][cp_captured];
-		g_MapCPB += scores[client][cp_blocked];
-		
 		if (IsClientInGame(client) && !IsFakeClient(client)) {
 			if(g_RowID[client] == -1 || g_ConnectTime[client] == 0) {
 				g_ConnectTime[client] = 0;
@@ -305,9 +272,6 @@ public OnMapEnd() {
 	Format(query2, sizeof(query2), "INSERT INTO `maplog` SET `name` = '%s', `kills` = %i, `assists` = %i, `dominations` = %i, `revenges` = %i, `flag_pick` = %i, `flag_cap` = %i, `flag_def` = %i, `flag_drop` = %i, `cp_captured` = %i, `cp_blocked` = %i, `playtime` = %i ON DUPLICATE KEY UPDATE `kills` = `kills` +%i, `assists` = `assists` + %i, `dominations` = `dominations` +%i, `revenges` = `revenges` + %i, `flag_pick` = `flag_pick` +%i, `flag_cap` = `flag_cap` +%i, `flag_def` = `flag_def` +%i, `flag_drop` = `flag_drop` + %i, `cp_captured` = `cp_captured` + %i, `cp_blocked` = `cp_blocked` + %i, `playtime` = `playtime` + %d", 
 		mapName, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapPlaytime, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapPlaytime);
 	SQL_TQuery(g_DB, OnRowUpdated, query2);
-	PurgeMap();
-	g_MapTime = 0;
-	g_MapPlaytime = 0;
 }
 
 public OnRowInserted(Handle:owner, Handle:hndl, const String:error[], any:userid) {
@@ -377,6 +341,7 @@ public Event_player_death(Handle:event, const String:name[], bool:dontBroadcast)
 	}
 
 	if (attacker != victim) {
+		g_MapKills++;
 		scores[attacker][kills]++;
 	}
 
@@ -385,6 +350,7 @@ public Event_player_death(Handle:event, const String:name[], bool:dontBroadcast)
 	if (assister != 0) {
 		GetClientAuthString(assister, asID, sizeof(asID));
 		assisterclass = TF2_GetPlayerClass(assister);
+		g_MapAssists++;
 		scores[assister][assists]++;
 	}
 
@@ -402,18 +368,22 @@ public Event_player_death(Handle:event, const String:name[], bool:dontBroadcast)
 
 	if (deathflags & 1) {
 		df_killerdomination = 1;
+		g_MapDoms++;
 		scores[attacker][dominations]++;
 	}
 	if (deathflags & 2) {
 		df_assisterdomination = 1;
+		g_MapDoms++;
 		scores[assister][dominations]++;
 	}
 	if (deathflags & 4) {
 		df_killerrevenge = 1;
+		g_MapRevs++;
 		scores[attacker][revenges]++;
 	}
 	if (deathflags & 8) {
 		df_assisterrevenge = 1;
+		g_MapRevs++;
 		scores[assister][revenges]++;
 	}
 
@@ -444,6 +414,12 @@ public Event_player_death(Handle:event, const String:name[], bool:dontBroadcast)
 	len3 += Format(buffer3[len3], sizeof(buffer3)-len3, "INSERT INTO `smalllog` (`attacker`, `weapon`, `deaths`, `customkill`)");
 	len3 += Format(buffer3[len3], sizeof(buffer3)-len3, " VALUES ('%s', '%s', '%i', '%i') ON DUPLICATE KEY UPDATE `deaths` = `deaths` + 1;",vID,weapon,1,customkill);
 	SQL_TQuery(g_DB, SQLError, buffer3);
+
+	decl String:query[1024];
+	Format(query, sizeof(query), "UPDATE `playerlog` SET `kills` = `kills` + %d, `deaths` = `deaths` + %d, `feigns` = `feigns` + %d, `assists` = `assists` + %d, `dominations` = `dominations` + %d, `revenges` = `revenges` + %d, `headshots` = `headshots` + %d, `backstabs` = `backstabs` + %d, `obj_built` = `obj_built` + %d, `obj_destroy` = `obj_destroy` + %d, `tele_player` = `tele_player` + %d, `flag_pick` = `flag_pick` + %d, `flag_cap` = `flag_cap` + %d, `flag_def` = `flag_def` + %d, `flag_drop` = `flag_drop` + %d, `cp_cap` = `cp_cap` + %d, `cp_block` = `cp_block` + %d WHERE id = %d",
+		scores[victim][kills], scores[victim][deaths], scores[victim][feigns], scores[victim][assists], scores[victim][dominations], scores[victim][revenges], scores[victim][headshots], scores[victim][backstabs], scores[victim][obj_built], scores[victim][obj_destroy], scores[victim][p_teleported], scores[victim][flag_pick], scores[victim][flag_cap], scores[victim][flag_def], scores[victim][flag_drop], scores[victim][cp_captured], scores[victim][cp_blocked], g_RowID[victim]);
+	SQL_TQuery(g_DB, OnRowUpdated, query, g_RowID[victim]);
+	PurgeClient(victim);
 }
 
 public Action:Event_player_teleported(Handle:event, const String:name[], bool:dontBroadcast) {
@@ -548,10 +524,12 @@ public Action:Event_teamplay_flag_event(Handle:event, const String:name[], bool:
 	GetCurrentMap(map, MAX_LINE_WIDTH);
 
 	if (state == 1) {
+		g_MapFP++;
 		scores[user][flag_pick]++;
 	}
 	if (state == 2) {
 		action = "flag_cap";
+		g_MapFC++;
 		scores[user][flag_cap]++;
 	}
 	if (state == 3) {
@@ -562,9 +540,11 @@ public Action:Event_teamplay_flag_event(Handle:event, const String:name[], bool:
 		GetClientAuthString(carrier,cID, sizeof(cID));
 
 		action = "flag_def";
+		g_MapFD++;
 		scores[user][flag_def]++;
 	}
 	if (state == 4) {
+		g_MapFDrop++;
 		scores[user][flag_drop]++;
 	}
 
@@ -593,6 +573,7 @@ public Action:Event_teamplay_point_captured(Handle:event, const String:name[], b
 		new TFClassType:capperclass = TF2_GetPlayerClass(client);
 
 		GetClientAuthString(client, cID, sizeof(cID));
+		g_MapCPP++;
 		scores[client][cp_captured]++;
 
 		new len = 0;
@@ -607,41 +588,12 @@ public Action:Event_teamplay_capture_blocked(Handle:event, const String:name[], 
 	new client = GetEventInt(event, "blocker");
 
 	if (client > 0) {
+		g_MapCPB++;
 		scores[client][cp_blocked]++;
 	}
 }
 
-updateClients(){
-	for (new client = 1; client <= MaxClients; client++) {
-		g_MapKills += scores[client][kills];
-		g_MapAssists += scores[client][assists];
-		g_MapDoms += scores[client][dominations];
-		g_MapRevs += scores[client][revenges];
-		g_MapFP += scores[client][flag_pick];
-		g_MapFC += scores[client][flag_cap];
-		g_MapFD += scores[client][flag_def];
-		g_MapFDrop += scores[client][flag_drop];
-		g_MapCPP += scores[client][cp_captured];
-		g_MapCPB += scores[client][cp_blocked];
-		
-		if (IsClientInGame(client) && !IsFakeClient(client)) {
-			if(g_RowID[client] == -1 || g_ConnectTime[client] == 0) {
-				g_ConnectTime[client] = 0;
-				return;
-			}
-
-			new String:auth[32];
-			GetClientAuthString(client, auth, sizeof(auth[]));
-
-			decl String:query[1024];
-			Format(query, sizeof(query), "UPDATE `playerlog` SET `playtime` = `playtime` + %d, `kills` = `kills` + %d, `deaths` = `deaths` + %d, `feigns` = `feigns` + %d, `assists` = `assists` + %d, `dominations` = `dominations` + %d, `revenges` = `revenges` + %d, `headshots` = `headshots` + %d, `backstabs` = `backstabs` + %d, `obj_built` = `obj_built` + %d, `obj_destroy` = `obj_destroy` + %d, `tele_player` = `tele_player` + %d, `flag_pick` = `flag_pick` + %d, `flag_cap` = `flag_cap` + %d, `flag_def` = `flag_def` + %d, `flag_drop` = `flag_drop` + %d, `cp_cap` = `cp_cap` + %d, `cp_block` = `cp_block` + %d WHERE id = %d",
-				GetTime() - g_ConnectTime[client], scores[client][kills], scores[client][deaths], scores[client][feigns], scores[client][assists], scores[client][dominations], scores[client][revenges], scores[client][headshots], scores[client][backstabs], scores[client][obj_built], scores[client][obj_destroy], scores[client][p_teleported], scores[client][flag_pick], scores[client][flag_cap], scores[client][flag_def], scores[client][flag_drop], scores[client][cp_captured], scores[client][cp_blocked], g_RowID[client]);
-			SQL_TQuery(g_DB, OnRowUpdated, query, g_RowID[client]);
-		}
-		PurgeClient(client);
-		g_ConnectTime[client] = GetTime();
-	}
-
+updateMap(){
 	new String:mapName[MAX_LINE_WIDTH];
 	GetCurrentMap(mapName,MAX_LINE_WIDTH);
 	decl String:query2[2048];
@@ -651,24 +603,24 @@ updateClients(){
 	PurgeMap();
 }
 
-PurgeClient(clientId) {
-	scores[clientId][kills] = 0;
-	scores[clientId][deaths] = 0;
-	scores[clientId][assists] = 0;
-	scores[clientId][headshots] = 0;
-	scores[clientId][backstabs] = 0;
-	scores[clientId][dominations] = 0;
-	scores[clientId][revenges] = 0;
-	scores[clientId][feigns] = 0;
-	scores[clientId][p_teleported] = 0;
-	scores[clientId][obj_built] = 0;
-	scores[clientId][obj_destroy] = 0;
-	scores[clientId][flag_pick] = 0;
-	scores[clientId][flag_cap] = 0;
-	scores[clientId][flag_def] = 0;
-	scores[clientId][flag_drop] = 0;
-	scores[clientId][cp_captured] = 0;
-	scores[clientId][cp_blocked] = 0;
+PurgeClient(client) {
+	scores[client][kills] = 0;
+	scores[client][deaths] = 0;
+	scores[client][assists] = 0;
+	scores[client][headshots] = 0;
+	scores[client][backstabs] = 0;
+	scores[client][dominations] = 0;
+	scores[client][revenges] = 0;
+	scores[client][feigns] = 0;
+	scores[client][p_teleported] = 0;
+	scores[client][obj_built] = 0;
+	scores[client][obj_destroy] = 0;
+	scores[client][flag_pick] = 0;
+	scores[client][flag_cap] = 0;
+	scores[client][flag_def] = 0;
+	scores[client][flag_drop] = 0;
+	scores[client][cp_captured] = 0;
+	scores[client][cp_blocked] = 0;
 }
 
 PurgeMap() {

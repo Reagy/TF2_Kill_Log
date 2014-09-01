@@ -9,7 +9,7 @@ include 'inc/database.class.php';
 $database = new Database();
 
 $database->query('SELECT itemlog.*, items.*, COUNT(itemlog.`index`) AS found FROM itemlog INNER JOIN items
-	ON itemlog.`index` = items.`index` GROUP BY itemlog.`index`, itemlog.`quality` ORDER BY found DESC');
+	ON itemlog.`index` = items.`index` GROUP BY itemlog.`index`, itemlog.`quality` ORDER BY time DESC LIMIT 0,500');
 $log = $database->resultset();
 
 ?>
@@ -29,6 +29,9 @@ $log = $database->resultset();
 				</tbody>
 			</table>
 			<div id="content" class="panel-body" style="padding:0px;">
+			<div style="text-align:center">
+				<h1>Last 500 Recorded Items</h1>
+			</div>
 <?php foreach ($log as $log): ?>
 				<div class="col-sm-2 getitem" style="cursor:pointer;">
 					<input type="hidden" value="<?php echo $log['index']; ?>"/>

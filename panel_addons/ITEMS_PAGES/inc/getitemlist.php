@@ -17,12 +17,14 @@ include 'database.class.php';
 $database = new Database();
 
 $database->query('SELECT itemlog.*, items.*, COUNT(itemlog.`index`) AS found FROM itemlog INNER JOIN items
-	ON itemlog.`index` = items.`index` WHERE `method` = :id GROUP BY itemlog.`index`, itemlog.`quality` ORDER BY found DESC');
+	ON itemlog.`index` = items.`index` WHERE `method` = :id GROUP BY itemlog.`index`, itemlog.`quality` ORDER BY time DESC');
 $database->bind(':id', $_GET['id']);
 $log = $database->resultset();
 
 ?>
-
+<div style="text-align:center">
+	<h1>Last 500 Recorded Items <?php echo Method($id); ?></h1>
+</div>
 <?php foreach ($log as $log): ?>
 <div class="col-sm-2 getitem" style="cursor:pointer;">
 	<input type="hidden" value="<?php echo $log['index']; ?>"/>

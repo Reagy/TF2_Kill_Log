@@ -5,7 +5,7 @@
 
 if(empty($_SERVER['HTTP_X_REQUESTED_WITH']) || !strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
 {
-    header("Location: ../index.php?error=".urlencode("Direct access no allowed."));
+    header("Location: ../index.php?error=".urlencode("Direct access not allowed."));
     die();
 }
 
@@ -150,11 +150,17 @@ if (isset($_GET['type']) && $_GET['type'] == 'getplayers') {
         ),
         array(
             'db'        => 'ROUND(kills/deaths,2)',
-            'dt'        => 'kpd'
+            'dt'        => 'kpd',
+            'formatter' => function( $d, $row ) {
+                return ($d == NULL ? "?" : $d);
+            }
         ),
         array(
             'db'        => 'ROUND(kills/(playtime/60),2)',
-            'dt'        => 'kpm'
+            'dt'        => 'kpm',
+            'formatter' => function( $d, $row ) {
+                return ($d == NULL ? "?" : $d);
+            }
         ),
         array(
             'db'        => 'playtime',
@@ -169,7 +175,11 @@ if (isset($_GET['type']) && $_GET['type'] == 'getplayers') {
             'formatter' => function( $d, $row ) {
                 return ($d == 0 ? "Connected" : date( 'F j, Y, g:i a', $d));
             }
-        )
+        ),
+        array(
+            'db'        => 'ROUND((playtime*.0005)+(kills-deaths)+(assists*.50)+((feigns*.25)+dominations+revenges+headshots+backstabs)+(tele_player*.25)+(flag_cap+flag_def+cp_cap+cp_block)+(obj_built*.25)+obj_destroy,0)',
+            'dt'        => 'points'
+        ),
     );
 
     $joinQuery = '';
@@ -298,5 +308,65 @@ if (isset($_GET['type']) && $_GET['type'] == 'getstreak') {
 
     echo json_encode(
         SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraCondition, $groupBy)
+    );
+}
+
+if (isset($_GET['type']) && $_GET['type'] == 'getitems') {
+
+    $table = 'itemlog';
+    $primaryKey = 'auth';
+     
+    $columns = array(
+        array(
+            'db'        => 'itemlog.auth',
+            'dt'        => 'auth',
+            'field'     => 'auth'
+        ),
+        array(
+            'db'        => 'itemlog.index',
+            'dt'        => 'index',
+            'field'     => 'index'
+        ),
+        array(
+            'db'        => 'itemlog.quality',
+            'dt'        => 'quality',
+            'field'     => 'quality',
+            'formatter' => function( $d, $row ) {
+                return QualityText($d,'text');
+            }
+        ),
+        array(
+            'db'        => 'itemlog.method',
+            'dt'        => 'method',
+            'field'     => 'method',
+            'formatter' => function( $d, $row ) {
+                return Method($d);
+            }
+        ),
+        array(
+            'db'        => 'itemlog.time',
+            'dt'        => 'time',
+            'field'     => 'time',
+            'formatter' => function( $d, $row ) {
+                return date("m/d/y, g:i a", $d);
+            }
+        ),
+        array(
+            'db'        => 'playerlog.name',
+            'dt'        => 'name',
+            'field'     => 'name',
+            'formatter' => function( $d, $row ) {
+                return htmlentities($d);
+            }
+        )
+    );
+
+    $extraCondition = "`index` = ".$_GET['id'];
+    $joinQuery = "FROM `itemlog` INNER JOIN `playerlog` ON (itemlog.`auth` = playerlog.`auth`)";
+
+    require('ssp.class.php');
+
+    echo json_encode(
+        SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraCondition)
     );
 }

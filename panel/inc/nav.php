@@ -45,6 +45,7 @@
 					<li><a href="weapons.php">Weapons</a></li>
 					<li><a href="actions.php">Actions</a></li>
 					<li><a href="streaks.php">Killstreaks</a></li>
+					<li><a href="maps.php">Maps</a></li>
 				</ul>
 			</div><!-- /.navbar-collapse -->
 		</nav>

@@ -63,4 +63,89 @@ function PlaytimeCon($key)
   return gmdate("H:i:s", $key);
 }
 
+function Quality($key)
+{
+  //Genuine
+  if($key == 1)
+    return "#4D7455";
+  //Vintage
+  elseif($key == 3)
+    return "#476291";
+  //Unusual
+  elseif($key == 5)
+    return "#8650AC";
+  //Unique
+  elseif($key == 6)
+    return "#FFD700";
+  //Strange
+  elseif($key == 11)
+    return "#CF6A32";
+  //Haunted
+  elseif($key == 13)
+    return "#38F3AB";
+  //Collectors
+  elseif($key == 14)
+    return "#AA0000";
+}
+
+function QualityText($key)
+{
+  //Genuine
+  if($key == 1)
+    return "Genuine";
+  //Vintage
+  elseif($key == 3)
+    return "Vintage";
+  //Unusual
+  elseif($key == 5)
+    return "Unusual";
+  //Unique
+  elseif($key == 6)
+    return "Unique";
+  //Strange
+  elseif($key == 11)
+    return "Strange";
+  //Haunted
+  elseif($key == 13)
+    return "Haunted";
+  //Collectors
+  elseif($key == 14)
+    return "";
+}
+
+function Method($key)
+{
+  if (is_numeric($key)) {
+    if($key == 0)
+      return "Found";
+    elseif($key == 1)
+      return "Crafted";
+    elseif($key == 2)
+      return "Traded";
+    elseif($key == 3)
+      return "Bought";
+    elseif($key == 4)
+      return "Unboxed";
+    elseif($key == 5)
+      return "Gifted";
+    else
+      return $key;
+  }
+  else {
+    if($key == "Found")
+      return 0;
+    elseif($key == "Crafted")
+      return 1;
+    elseif($key == "Traded")
+      return 2;
+    elseif($key == "Bought")
+      return 3;
+    elseif($key == "Unboxed")
+      return 4;
+    elseif($key == "Gifted")
+      return 5;
+    else
+      return $key;
+  }
+}
 ?>

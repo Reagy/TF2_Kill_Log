@@ -151,7 +151,7 @@ class SSP {
 
                 if ( $requestColumn['searchable'] == 'true' ) {
                     $binding = SSP::bind( $bindings, '%'.$str.'%', PDO::PARAM_STR );
-                    $globalSearch[] = ($isJoin) ? $column['db']." LIKE ".$binding : "`".$column['db']."` LIKE ".$binding;
+                    $globalSearch[] = ($isJoin) ? $column['db']." LIKE ".$binding : $column['db']." LIKE ".$binding;
                 }
             }
         }
@@ -167,7 +167,7 @@ class SSP {
             if ( $requestColumn['searchable'] == 'true' &&
                 $str != '' ) {
                 $binding = SSP::bind( $bindings, '%'.$str.'%', PDO::PARAM_STR );
-                $columnSearch[] = ($isJoin) ? $column['db']." LIKE ".$binding : "`".$column['db']."` LIKE ".$binding;
+                $columnSearch[] = ($isJoin) ? $column['db']." LIKE ".$binding : $column['db']." LIKE ".$binding;
             }
         }
 

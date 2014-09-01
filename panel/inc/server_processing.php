@@ -175,11 +175,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'getplayers') {
             'formatter' => function( $d, $row ) {
                 return ($d == 0 ? "Connected" : date( 'F j, Y, g:i a', $d));
             }
-        ),
-        array(
-            'db'        => 'ROUND((playtime*.0005)+(kills-deaths)+(assists*.50)+((feigns*.25)+dominations+revenges+headshots+backstabs)+(tele_player*.25)+(flag_cap+flag_def+cp_cap+cp_block)+(obj_built*.25)+obj_destroy,0)',
-            'dt'        => 'points'
-        ),
+        )
     );
 
     $joinQuery = '';

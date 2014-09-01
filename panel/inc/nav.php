@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<title><?php echo $Title; ?></title>
 	<link href="css/bootstrap.min.css" rel="stylesheet">
-	<link href="css/font-awesome.css" rel="stylesheet">
+	<link href="css/font-awesome.min.css" rel="stylesheet">
 	<link href="css/morris.css" rel="stylesheet">
 	<link href="css/dataTables.bootstrap.css" rel="stylesheet">
 	<link href="css/stats.css" rel="stylesheet">
@@ -46,6 +46,7 @@
 					<li><a href="actions.php">Actions</a></li>
 					<li><a href="streaks.php">Killstreaks</a></li>
 					<li><a href="maps.php">Maps</a></li>
+					<li><a href="items.php">Items</a></li>
 				</ul>
 			</div><!-- /.navbar-collapse -->
 		</nav>

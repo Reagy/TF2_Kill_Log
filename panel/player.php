@@ -95,11 +95,22 @@ $url = "http://steamcommunity.com/profiles/".$communityID;
 							<li id="getplayerobject"><a href="#" data-toggle="tab">Buildings</a></li>
 							<li id="getplayerteam"><a href="#" data-toggle="tab">Team</a></li>
 							<li id="getplayerlog"><a href="#" data-toggle="tab">Kill Log</a></li>
+							<li id="getplayerhistory"><a href="#" data-toggle="tab">History</a></li>
 						</ul>
 						<div>
 							<div id="content" class="panel-body" style="padding:0px">
 								<table class="table table-bordered table-striped table-hover table-condensed display">
+									<thead>
+										<tr>
+											<th>Stat</th>
+											<th>Total</th>
+										</tr>
+									</thead>
 									<tbody>
+									<tr>
+											<td>Total Plytime</td>
+											<td><?php echo PlaytimeCon($player['playtime']); ?></td>
+										</tr>
 										<tr>
 											<td>Total Kills</td>
 											<td><?php echo $player['kills']; ?></td>

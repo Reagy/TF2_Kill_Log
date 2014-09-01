@@ -1,6 +1,4 @@
 <?php 
-date_default_timezone_set('America/Chicago');
-error_reporting(E_ALL);
 
 include 'inc/config.php';
 
@@ -9,11 +7,6 @@ include 'inc/database.class.php';
 
 // Instantiate database.
 $database = new Database();
-
-/*$database->query('SELECT `map`, `ateam`, COUNT(`attacker`) AS `kills`, SUM(`dominated`+`assister_dominated`) AS `dominations`,
-	SUM(`revenge`+`assister_revenge`) AS `revenges`, SUM(`crit`) AS `critkill` FROM `killlog`
-	GROUP BY `map`, `ateam` ORDER BY `kills` DESC');
-$log = $database->resultset();*/
 
 $database->query('SELECT * FROM `maplog` ORDER BY `playtime` DESC');
 $log = $database->resultset();

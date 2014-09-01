@@ -36,7 +36,7 @@ foreach ($player as $player) {
 	</thead>
 	<tbody>
 	<tr>
-			<td>Total Plytime</td>
+			<td>Total Playtime</td>
 			<td><?php echo PlaytimeCon($player['playtime']); ?></td>
 		</tr>
 		<tr>

@@ -2,7 +2,7 @@
 
 if(empty($_SERVER['HTTP_X_REQUESTED_WITH']) || !strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') 
 {
-	header("Location: ../index.php?error=".urlencode("Direct access no allowed."));
+	header("Location: ../index.php?error=".urlencode("Direct access not allowed."));
 	die();
 }
 
@@ -28,7 +28,17 @@ foreach ($player as $player) {
 ?>
 
 <table class="table table-bordered table-striped table-hover table-condensed display">
+	<thead>
+		<tr>
+			<th>Stat</th>
+			<th>Total</th>
+		</tr>
+	</thead>
 	<tbody>
+	<tr>
+			<td>Total Plytime</td>
+			<td><?php echo PlaytimeCon($player['playtime']); ?></td>
+		</tr>
 		<tr>
 			<td>Total Kills</td>
 			<td><?php echo $player['kills']; ?></td>

@@ -105,88 +105,71 @@ $url = "http://steamcommunity.com/profiles/".$communityID;
 										<tr>
 											<th>Stat</th>
 											<th>Total</th>
-											<th>Points</th>
 										</tr>
 									</thead>
 									<tbody>
 									<tr>
 											<td>Total Plytime</td>
 											<td><?php echo PlaytimeCon($player['playtime']); ?></td>
-											<td><?php echo round($player['playtime']*.0005,0); ?></td>
 										</tr>
 										<tr>
 											<td>Total Kills</td>
-											<td><?php echo $player['kills']; ?></td>
 											<td><?php echo $player['kills']; ?></td>
 										</tr>
 										<tr>
 											<td>Total Deaths</td>
 											<td><?php echo $player['deaths']; ?></td>
-											<td><?php echo "-".$player['deaths']; ?></td>
 										</tr>
 										<tr>
 											<td>Total Assists</td>
 											<td><?php echo $player['assists']; ?></td>
-											<td><?php echo $player['assists']*.5; ?></td>
 										</tr>
 										<tr>
 											<td>Total Dominations</td>
-											<td><?php echo $player['dominations']; ?></td>
 											<td><?php echo $player['dominations']; ?></td>
 										</tr>
 										<tr>
 											<td>Total Revenges</td>
 											<td><?php echo $player['revenges']; ?></td>
-											<td><?php echo $player['revenges']; ?></td>
 										</tr>
 										<tr>
 											<td>Total Headshots</td>
-											<td><?php echo $player['headshots']; ?></td>
 											<td><?php echo $player['headshots']; ?></td>
 										</tr>
 										<tr>
 											<td>Total Backstabs</td>
 											<td><?php echo $player['backstabs']; ?></td>
-											<td><?php echo $player['backstabs']; ?></td>
 										</tr>
 										<tr>
 											<td>Total Objects Built</td>
 											<td><?php echo $player['obj_built']; ?></td>
-											<td><?php echo $player['obj_built']*.25; ?></td>
 										</tr>
 										<tr>
 											<td>Total Objects Destroyed</td>
-											<td><?php echo $player['obj_destroy']; ?></td>
 											<td><?php echo $player['obj_destroy']; ?></td>
 										</tr>
 										<tr>
 											<td>Total Players Teleported</td>
 											<td><?php echo $player['tele_player']; ?></td>
-											<td><?php echo $player['tele_player']*.25; ?></td>
 										</tr>
 										<tr>
 											<td>Total CTF Picked</td>
-											<td><?php echo $player['flag_pick']; ?></td>
 											<td><?php echo $player['flag_pick']; ?></td>
 										</tr>
 										<tr>
 											<td>Total CTF Captured</td>
 											<td><?php echo $player['flag_cap']; ?></td>
-											<td><?php echo $player['flag_cap']; ?></td>
 										</tr>
 										<tr>
 											<td>Total CTF Defended</td>
-											<td><?php echo $player['flag_def']; ?></td>
 											<td><?php echo $player['flag_def']; ?></td>
 										</tr>
 										<tr>
 											<td>Total CP Captured</td>
 											<td><?php echo $player['cp_cap']; ?></td>
-											<td><?php echo $player['cp_cap']; ?></td>
 										</tr>
 										<tr>
 											<td>Total CP Blocked</td>
-											<td><?php echo $player['cp_block']; ?></td>
 											<td><?php echo $player['cp_block']; ?></td>
 										</tr>
 									</tbody>

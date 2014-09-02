@@ -23,7 +23,7 @@ $log = $database->resultset();
 
 ?>
 <div style="text-align:center">
-	<h1>Last 100 Recorded Items <?php echo Method($id); ?></h1>
+	<h1>Last 100 Items <?php echo Method($id); ?></h1>
 </div>
 <?php foreach ($log as $log): ?>
 <div class="col-sm-2 getitem" style="cursor:pointer;">

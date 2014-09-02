@@ -6,7 +6,13 @@
 #include <tf2_stocks>
 #include <geoip>
 
-#define PLUGIN_VERSION "0.8.3"
+#undef REQUIRE_PLUGIN
+#include <updater>
+#define REQUIRE_PLUGIN
+#define DEBUG   // This will enable verbose logging. Useful for developers testing their updates.
+
+#define UPDATE_URL		"https://raw.githubusercontent.com/Sinclair47/TF2_Kill_Log/master/klog.txt"
+#define PLUGIN_VERSION "0.9.1"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 
@@ -58,7 +64,7 @@ public Plugin:myinfo = {
 	author = "Sinclair",
 	description = "TF2 Kill Log",
 	version = PLUGIN_VERSION,
-	url = ""
+	url = "https://forums.alliedmods.net/showpost.php?p=2190062&postcount=1"
 }
 
 public OnPluginStart() {
@@ -66,7 +72,8 @@ public OnPluginStart() {
 	CreateConVar("klog_v", PLUGIN_VERSION, "TF2 Kill Log", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	g_ExLog = CreateConVar("klog_extended", "1", "1 Enables / 0 Disables extended log features");
 	g_URL = CreateConVar("klog_url","","Kill Log URL, example: yoursite.com/stats/", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
-	RegConsoleCmd("sm_rank", Command_OpenRank, "Opens player's Kill Log profile");
+	AddCommandListener(Command_Say, "say");
+	AddCommandListener(Command_Say, "say_team");
 	
 	HookEvent("player_death", Event_player_death);
 	HookEvent("teamplay_point_captured", Event_teamplay_point_captured);
@@ -75,22 +82,41 @@ public OnPluginStart() {
 	HookEvent("object_destroyed", Event_object_destroyed);
 	HookEvent("player_builtobject", Event_player_builtobject);
 	HookEvent("player_teleported", Event_player_teleported);
+
+	if (LibraryExists("updater")) {
+		Updater_AddPlugin(UPDATE_URL);
+	}
 }
 
-public Action:Command_OpenRank(client, args) {
-	new String:path[255], String:playerURL[255], String:cID[MAX_LINE_WIDTH];
-	new Handle:Kv = CreateKeyValues("data");
-	GetConVarString(g_URL,path, sizeof(path));
-	GetClientAuthString(client, cID, sizeof(cID));
+public OnLibraryAdded(const String:name[])
+{
+	if (StrEqual(name, "updater")) {
+		Updater_AddPlugin(UPDATE_URL);
+	}
+}
 
-	Format(playerURL, sizeof(playerURL), "http://%splayer.php?id=%s",path,cID);
-	KvSetNum(Kv, "customsvr", 1);
-	KvSetString(Kv, "type", "2");
-	KvSetString(Kv, "title", "");
-	KvSetString(Kv, "msg", playerURL);
-	ShowVGUIPanel(client, "info", Kv);
-	CloseHandle(Kv);
+public Action:Command_Say(client, const String:command[], args) {
+	if (!IsClientInGame(client) || client == 0) {
+		return Plugin_Continue;
+	}
 
+	new String:text[512];
+	GetCmdArg(1, text, sizeof(text));
+
+	if (StrEqual(text, "!Rank", false) || StrEqual(text, "Rank", false)) {
+		new String:path[255], String:playerURL[255], String:cID[MAX_LINE_WIDTH];
+		new Handle:Kv = CreateKeyValues("data");
+		GetConVarString(g_URL,path, sizeof(path));
+		GetClientAuthString(client, cID, sizeof(cID));
+
+		Format(playerURL, sizeof(playerURL), "http://%splayer.php?id=%s",path,cID);
+		KvSetNum(Kv, "customsvr", 1);
+		KvSetString(Kv, "type", "2");
+		KvSetString(Kv, "title", "");
+		KvSetString(Kv, "msg", playerURL);
+		ShowVGUIPanel(client, "info", Kv);
+		CloseHandle(Kv);
+	}
 	return Plugin_Handled;
 }
 

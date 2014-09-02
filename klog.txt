@@ -4,10 +4,10 @@
 	{
 		"Version"
 		{
-			"Latest"	"0.9.0"
+			"Latest"	"0.9.1"
 		}
 		
-		"Notes"	"More info @ www.sourcemod.net. Changes in 0.9.0:"
+		"Notes"	"More info @ www.sourcemod.net. Changes in 0.9.1:"
 		"Notes"	"Added Updater Support"
 	}
 	

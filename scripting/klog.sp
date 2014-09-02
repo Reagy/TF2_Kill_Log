@@ -8,11 +8,9 @@
 
 #undef REQUIRE_PLUGIN
 #include <updater>
-#define REQUIRE_PLUGIN
-#define DEBUG   // This will enable verbose logging. Useful for developers testing their updates.
 
 #define UPDATE_URL		"https://raw.githubusercontent.com/Sinclair47/TF2_Kill_Log/master/klog.txt"
-#define PLUGIN_VERSION "0.9.1"
+#define PLUGIN_VERSION "0.9.2"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 

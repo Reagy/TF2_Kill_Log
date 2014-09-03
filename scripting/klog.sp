@@ -10,7 +10,7 @@
 #include <updater>
 
 #define UPDATE_URL		"https://raw.githubusercontent.com/Sinclair47/TF2_Kill_Log/master/klog.txt"
-#define PLUGIN_VERSION "0.9.2"
+#define PLUGIN_VERSION "0.9.3"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 
@@ -115,7 +115,7 @@ public Action:Command_Say(client, const String:command[], args) {
 		ShowVGUIPanel(client, "info", Kv);
 		CloseHandle(Kv);
 	}
-	return Plugin_Handled;
+	return Plugin_Continue;
 }
 
 public OnPluginEnd() {

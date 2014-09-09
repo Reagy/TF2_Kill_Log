@@ -5,14 +5,14 @@ ini_set('default_charset', 'utf-8');
 
 //Database Info
 define("DB_HOST",  'localhost');
-define("DB_USER",  'USERNAME');
-define("DB_PASS",  'PASSWORD');
-define("DB_NAME",  'DATABASE');
+define("DB_USER",  'name');
+define("DB_PASS",  'pass');
+define("DB_NAME",  'database');
 
 $Home = "/";
 $Title = "Title";
 
-const STEAM_APIKEY  = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+const STEAM_APIKEY  = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 function SteamTo64($key) 
 { 
@@ -60,7 +60,7 @@ function StatCon($key,$lock)
 
 function PlaytimeCon($key)
 {
-  return gmdate("H:i:s", $key);
+  return floor($key/3600).gmdate(':i:s',$key);
 }
 
 function Quality($key)

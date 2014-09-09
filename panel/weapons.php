@@ -29,7 +29,7 @@ foreach ($log as $key => $value) {
 
 ?>
 <?php include("inc/nav.php"); ?>
-		<div style="background-color:#f5f5f5;height:100%;border:1px solid #222222">
+		<div class="stats-body">
 			<div class="row" style="padding:20px">
 				<div class="col-md-3 col-sm-4">
 					<div class="panel panel-inverse">
@@ -82,7 +82,7 @@ foreach ($log as $key => $value) {
 											<span><?php echo $log['name']; ?></span>
 										</td>
 										<td>
-											<h4><?php echo $log['kills']; ?></h4>
+											<h4><?php echo number_format($log['kills']); ?></h4>
 										</td>
 									</tr>
 <?php endforeach ?>
@@ -103,8 +103,8 @@ foreach ($log as $key => $value) {
 					</div>
 				</div>
 			</div>
-<?php include 'inc/footer.php'; ?>
 		</div>
+<?php include 'inc/footer.php'; ?>
 	</div>
 <script>
 $(document).on("click",".getweapon",function(){
@@ -142,6 +142,30 @@ function affixWidth() {
 
 $(document).ready(function () {
 	affixWidth();
+});
+</script>
+<script>
+
+function affixWidth() {
+	var affix = $('#affixed');
+	var width = affix.width();
+	affix.width(width);
+}
+
+$(window).on('load resize', function(){
+	$('#affixed').affix({
+		offset: { 
+			top: $('#body').offset().top,
+			bottom: 120
+		}
+	});
+
+	affixWidth();
+	var w = $(window).width();
+	var h = $(window).height();
+
+	$('#result').height(h);
+	$('#affixed').height(h);
 });
 </script>
 </body>

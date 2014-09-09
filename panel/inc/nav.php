@@ -8,6 +8,7 @@
 	<link href="css/morris.css" rel="stylesheet">
 	<link href="css/dataTables.bootstrap.css" rel="stylesheet">
 	<link href="css/stats.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/daterangepicker.css">
 	<script src="js/jquery-1.11.1.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<!-- DataTables JS -->
@@ -16,36 +17,42 @@
 	<!-- Morris.js -->
 	<script src="js/raphael-min.js"></script>
 	<script src="js/morris.min.js"></script>
+	<!-- DateRangePicker -->
+	<script src="js/moment.min.js"></script>
+	<script src="js/daterangepicker.js"></script>
 </head>
 <body>
-	<div class="container">
-		<div class="jumbotron">
-			<div class="row">
-				<div class="col-sm-11">
-					<div class="pull-left"><h1><?php echo "Stats - ".ucwords(basename($_SERVER['SCRIPT_FILENAME'], ".php")); ?></h1></div>
+	<div id="wrap">
+		<div class="container" style="height:100%">
+			<div class="jumbotron">
+				<div class="row">
+					<div class="col-sm-11">
+						<div class="pull-left"><h1><?php echo "Stats - ".ucwords(basename($_SERVER['SCRIPT_FILENAME'], ".php")); ?></h1></div>
+					</div>
 				</div>
 			</div>
-		</div>
-		<nav class="navbar navbar-inverse" role="navigation">
-			<!-- Brand and toggle get grouped for better mobile display -->
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="<?php echo $Home; ?>">Home</a>
-			</div>
-			<!-- Collect the nav links, forms, and other content for toggling -->
-			<div class="collapse navbar-collapse" id="menu">
-				<ul class="nav navbar-nav">
-					<li><a href="index.php">Current</a></li>
-					<li><a href="players.php">Players</a></li>
-					<li><a href="weapons.php">Weapons</a></li>
-					<li><a href="actions.php">Actions</a></li>
-					<li><a href="streaks.php">Killstreaks</a></li>
-					<li><a href="maps.php">Maps</a></li>
-				</ul>
-			</div><!-- /.navbar-collapse -->
-		</nav>
+			<nav class="navbar navbar-inverse" role="navigation">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="<?php echo $Home; ?>">Home</a>
+				</div>
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="collapse navbar-collapse" id="menu">
+					<ul class="nav navbar-nav">
+						<li><a href="index.php">Current</a></li>
+						<li><a href="players.php">Players</a></li>
+						<li><a href="weapons.php">Weapons</a></li>
+						<li><a href="actions.php">Actions</a></li>
+						<li><a href="streaks.php">Killstreaks</a></li>
+						<li><a href="maps.php">Maps</a></li>
+						<li><a href="items.php">Items</a></li>
+						<li><a href="top.php">Top 10</a></li>
+					</ul>
+				</div><!-- /.navbar-collapse -->
+			</nav>

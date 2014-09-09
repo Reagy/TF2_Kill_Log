@@ -17,13 +17,13 @@ include 'database.class.php';
 // Instantiate database.
 $database = new Database();
 
-$database->query('SELECT attacker, COUNT(attacker) AS kills, SUM(dominated) AS dominations, SUM(revenge+assister_revenge) AS revenges,
-	DATE(FROM_UNIXTIME(`killtime`)) AS date FROM `killlog` WHERE `attacker` = :id GROUP BY date LIMIT 0,7');
+$database->query('SELECT attacker, COUNT(attacker) AS kills, DATE(FROM_UNIXTIME(`killtime`)) AS date
+	FROM `killlog` WHERE `attacker` = :id GROUP BY date');
 $database->bind(':id', $_GET['id']);
 $history = $database->resultset();
 
 $database->query('SELECT victim, COUNT(victim) AS deaths, DATE(FROM_UNIXTIME(`killtime`)) AS date 
-	FROM `killlog` WHERE `victim` = :id GROUP BY date LIMIT 0,7');
+	FROM `killlog` WHERE `victim` = :id GROUP BY date');
 $database->bind(':id', $_GET['id']);
 $deaths = $database->resultset();
 
@@ -38,21 +38,23 @@ foreach ($history as $key => $value) {
 $history = json_encode($history);
 
 ?>
-<div id='chart' style='height:300px;border-bottom:1px solid #222222;cursor:pointer'></div>
+<div id='chart' style='height:400px;'></div>
 
 </div>
 <script type="text/javascript">
-Morris.Bar ({
+Morris.Area ({
 	element: 'chart',
 	data: <?php echo $history; ?>,
 	xkey: 'date',
-	ykeys: ['kills', 'deaths', 'dominations', 'revenges'],
-	labels: ['Kills', 'Deaths', 'Dominations', 'Revenges'],
+	ykeys: ['kills', 'deaths'],
+	labels: ['Kills', 'Deaths'],
 	gridTextColor: ['#222222'],
-	barColors: ['#222222', '#e74c3c', '#c0392b'],
+	lineColors: ['#222222', '#e74c3c'],
 	barRatio: 0.4,
 	xLabelAngle: 0,
 	hideHover: 'auto',
-	resize: true
+	parseTime: false,
+	resize: true,
+	behaveLikeLine: true
 })
 </script>

@@ -40,7 +40,7 @@ foreach ($log as $key => $value) {
 
 <?php $i=1; ?>
 <?php foreach ($log as $log): ?>
-								<div class="col-sm-3 getweapon" style="border:1px solid #000000;height:100px" data-toggle="tooltip" data-placement="top" title="<?php echo $log['name']; ?>">
+								<div class="col-md-3 col-sm-4 col-xs-6 getweapon" style="border:1px solid #000000;height:100px" data-toggle="tooltip" data-placement="top" title="<?php echo $log['name']; ?>">
 									<div class="row">
 										<div class="pull-left">
 											<span class='fa-stack fa-2x'>
@@ -49,11 +49,11 @@ foreach ($log as $key => $value) {
 											</span>
 										</div>
 										<div class="pull-right" style="padding-right:10px">
-											<h3><?php echo $log['total']." Kills"; ?></h3>
+											<h3><?php echo number_format($log['total'])." Kills"; ?></h3>
 										</div>
 									</div>
 									<div>
-										<img style="display:block;margin-left:auto;margin-right:auto;" src="<?php echo $log['image']; ?>" alt="<?php echo $log['name']; ?>">
+										<img class="img-responsive" style="display:block;margin-left:auto;margin-right:auto;" src="<?php echo $log['image']; ?>" alt="<?php echo $log['name']; ?>">
 										<input type="hidden" value="<?php echo $log['weapon']; ?>"/>
 									</div>
 								</div>

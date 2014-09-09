@@ -1,6 +1,6 @@
 <?php include "inc/config.php"; ?>
 <?php include "inc/nav.php"; ?>
-		<div style="background-color:#f5f5f5;height:100%;border:1px solid #222222">
+		<div class="stats-body">
 			<div style="padding:10px">
 				<table id="players" class="table table-bordered table-striped table-condensed display" style="cursor:pointer">
 					<thead>
@@ -21,8 +21,8 @@
 					</tbody>
 				</table>
 			</div>
-<?php include 'inc/footer.php'; ?>
 		</div>
+<?php include 'inc/footer.php'; ?>
 	</div>
 </body>
 <script>

@@ -38,7 +38,7 @@ foreach ($events as $key => $value) {
 }
 ?>
 
-							<div style="margin-bottom:250px">
+							<div class="row">
 								<h1>Control Point</h1>
 <?php if (isset($cp)): ?>
 <?php foreach ($cp as $cp): ?>
@@ -62,7 +62,7 @@ foreach ($events as $key => $value) {
 <?php endif ?>
 							</div>
 
-							<div style="margin-bottom:250px">
+							<div class="row">
 								<h1>Capture the Flag</h1>
 <?php if (isset($ctf)): ?>
 <?php foreach ($ctf as $ctf): ?>

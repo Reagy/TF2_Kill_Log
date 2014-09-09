@@ -27,7 +27,7 @@ foreach ($log as $key => $value) {
 }
 ?>
 <?php include "inc/nav.php"; ?>
-	<div style="background-color:#f5f5f5;height:100%;border:1px solid #222222">
+	<div class="stats-body">
 		<div class="panel-body" style="padding:0px;">
 <?php foreach ($log as $log): ?>
 			<div class="col-sm-4 getstreak" style="border:1px solid #000000;height:125px;cursor:pointer">
@@ -36,7 +36,7 @@ foreach ($log as $key => $value) {
 					<div class="pull-left">
 						<span class='fa-stack fa-2x'>
 							<i class='fa fa-circle-thin fa-stack-2x'></i>
-							<i class='fa-stack-1x' style='color:#222222'><?php echo $log['ks']; ?></i>
+							<i class='fa-stack-1x' style='color:#222222'><?php echo number_format($log['ks']); ?></i>
 						</span>
 					</div>
 					<div class="pull-right" style="padding-right: 10px;display:inline-block; vertical-align:top">
@@ -50,8 +50,8 @@ foreach ($log as $key => $value) {
 			</div>
 <?php endforeach ?>
 		</div>
-<?php include "inc/footer.php"; ?>
 	</div>
+<?php include "inc/footer.php"; ?>
 </div>
 <!-- Modal -->
 <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

@@ -34,12 +34,18 @@ if (isset($_GET['type']) && $_GET['type'] == 'getwep') {
         array(
             'db'        => 'smalllog.kills',
             'dt'        => 'kills',
-            'field'     => 'kills'
+            'field'     => 'kills',
+            'formatter' => function( $d, $row ) {
+                return number_format($d);
+            }
         ),
         array(
             'db'        => 'smalllog.deaths',
             'dt'        => 'deaths',
-            'field'     => 'deaths'
+            'field'     => 'deaths',
+            'formatter' => function( $d, $row ) {
+                return number_format($d);
+            }
         ),
         array(
             'db'        => 'smalllog.crits',
@@ -49,7 +55,10 @@ if (isset($_GET['type']) && $_GET['type'] == 'getwep') {
         array(
             'db'        => 'smalllog.ks',
             'dt'        => 'ks',
-            'field'     => 'ks'
+            'field'     => 'ks',
+            'formatter' => function( $d, $row ) {
+                return number_format($d);
+            }
         ),
         array(
             'db'        => 'smalllog.customkill',
@@ -85,13 +94,19 @@ if (isset($_GET['type']) && $_GET['type'] == 'getaction') {
             'db'        => 'SUM(smalllog.kills)',
             'dt'        => 'kills',
             'field'     => 'kills',
-            'as'        => 'kills'
+            'as'        => 'kills',
+            'formatter' => function( $d, $row ) {
+                return number_format($d);
+            }
         ),
         array(
             'db'        => 'SUM(smalllog.deaths)',
             'dt'        => 'deaths',
             'field'     => 'deaths',
-            'as'        => 'deaths'
+            'as'        => 'deaths',
+            'formatter' => function( $d, $row ) {
+                return number_format($d);
+            }
         ),
         array(
             'db'        => 'smalllog.attacker',
@@ -138,15 +153,24 @@ if (isset($_GET['type']) && $_GET['type'] == 'getplayers') {
         ),
         array(
             'db'        => 'kills',
-            'dt'        => 'kills'
+            'dt'        => 'kills',
+            'formatter' => function( $d, $row ) {
+                return number_format($d);
+            }
         ),
         array(
             'db'        => 'deaths',
-            'dt'        => 'deaths'
+            'dt'        => 'deaths',
+            'formatter' => function( $d, $row ) {
+                return number_format($d);
+            }
         ),
         array(
             'db'        => 'assists',
-            'dt'        => 'assists'
+            'dt'        => 'assists',
+            'formatter' => function( $d, $row ) {
+                return number_format($d);
+            }
         ),
         array(
             'db'        => 'ROUND(kills/deaths,2)',
@@ -232,7 +256,10 @@ if (isset($_GET['type']) && $_GET['type'] == 'getplayer') {
         array(
             'db'        => 'killlog.wep_ks',
             'dt'        => 'wep_ks',
-            'field'     => 'wep_ks'
+            'field'     => 'wep_ks',
+            'formatter' => function( $d, $row ) {
+                return number_format($d);
+            }
         ),
         array(
             'db'        => 'a.name',
@@ -279,7 +306,10 @@ if (isset($_GET['type']) && $_GET['type'] == 'getstreak') {
         array(
             'db'        => 'smalllog.ks',
             'dt'        => 'ks',
-            'field'     => 'ks'
+            'field'     => 'ks',
+            'formatter' => function( $d, $row ) {
+                return number_format($d);
+            }
         ),
         array(
             'db'        => 'smalllog.attacker',

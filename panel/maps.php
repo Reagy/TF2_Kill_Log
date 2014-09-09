@@ -15,7 +15,7 @@ $i = 1;
 ?>
 
 <?php include "inc/nav.php"; ?>
-	<div style="background-color:#f5f5f5;height:100%;border:1px solid #222222">
+	<div class="stats-body">
 		<div class="panel-body" style="padding:0px;">
 <?php foreach ($log as $log): ?>
 			<div class="col-sm-12 getstreak" style="border:1px solid #000000;height:125px;cursor:pointer">
@@ -33,12 +33,12 @@ $i = 1;
 				</div>
 				<div class="row" style="padding:10px">
 					<div class="pull-left" style="padding-right: 10px;display:inline-block; vertical-align:top">
-						<h4><?php echo "Kills: ".$log['kills']." Assists: ".$log['assists']." Dominations: ".$log['dominations']." Revenges: ".$log['revenges']." Playtime: ".PlaytimeCon($log['playtime'])." hrs"; ?></h4>
+						<h4><?php echo "Kills: ".number_format($log['kills'])." Assists: ".number_format($log['assists'])." Dominations: ".number_format($log['dominations'])." Revenges: ".number_format($log['revenges'])." Playtime: ".PlaytimeCon($log['playtime'])." hrs"; ?></h4>
 					</div>
 				</div>
 			</div>
 <?php endforeach ?>
 		</div>
-<?php include "inc/footer.php"; ?>
 	</div>
+<?php include "inc/footer.php"; ?>
 </div>

@@ -31,7 +31,7 @@ foreach ($object as $key => $value) {
 }
 ?>
 
-							<div style="margin-bottom:250px">
+							<div class="row">
 								<h1>Buildings Destroyed</h1>
 <?php if (isset($killer)): ?>
 <?php foreach ($killer as $killer): ?>
@@ -55,7 +55,7 @@ foreach ($object as $key => $value) {
 <?php endif ?>
 							</div>
 
-							<div style="margin-bottom:250px">
+							<div class="row">
 								<h1>Buildings Lost</h1>
 <?php if (isset($victim)): ?>
 <?php foreach ($victim as $victim): ?>

@@ -16,40 +16,41 @@ $p_chart = json_encode($player);
 ?>
 
 <?php include("inc/nav.php"); ?>
-		<div style="background-color:#f5f5f5;height:100%;border:1px solid #222222;height:100%">
+		<div class="stats-body">
 <?php if (isset($_GET['error'])): ?>
 			<div class="alert alert-danger">
 				<?php echo $_GET['error']; ?>
 			</div>
 <?php endif ?>
 			<div id='chart' style='height:300px;border-bottom:1px solid #222222;cursor:pointer'></div>
-			<table id="players" class="table table-bordered table-striped table-condensed display">
+			<table id="players" class="table table-bordered table-striped table-condensed display" style="margin-bottom:0">
 				<thead>
 					<tr>
-						<th>Name</th>
-						<th>Kills</th>
-						<th>Deaths</th>
-						<th>KPD</th>
-						<th>KPM</th>
-						<th>Current Playtime</th>
+						<th style="text-align:left">Name</th>
+						<th style="text-align:center;">Kills</th>
+						<th style="text-align:center;">Deaths</th>
+						<th style="text-align:center;">KPD</th>
+						<th style="text-align:center;">KPM</th>
+						<th style="text-align:right">Current Playtime</th>
 					</tr>
 				</thead>
 				<tbody>
 <?php foreach($player as $player): ?>
 					<tr>
-						<td style="vertical-align:middle"><h4><?php echo "<a href='player.php?id=".$player['auth']."'>"?><?php echo htmlentities($player['name']); ?></a></h4></td>
-						<td style="vertical-align:middle"><h4><?php echo $player['kills']; ?></h4></td>
-						<td style="vertical-align:middle"><h4><?php echo $player['deaths']; ?></h4></td>
-						<td style="vertical-align:middle"><h4><?php echo StatCon($player['kills'],$player['deaths']); ?></h4></td>
-						<td style="vertical-align:middle"><h4><?php echo StatCon($player['kills'],($player['playtime']/60)); ?></h4></td>
-						<td style="vertical-align:middle"><h4><?php echo PlaytimeCon(time() - $player['connect_time']); ?></h4></td>
+						<td style="text-align:left;vertical-align:middle"><h4><?php echo "<a href='player.php?id=".$player['auth']."'>"?><?php echo htmlentities($player['name']); ?></a></h4></td>
+						<td style="text-align:center;vertical-align:middle"><h4><?php echo number_format($player['kills']); ?></h4></td>
+						<td style="text-align:center;vertical-align:middle"><h4><?php echo number_format($player['deaths']); ?></h4></td>
+						<td style="text-align:center;vertical-align:middle"><h4><?php echo StatCon($player['kills'],$player['deaths']); ?></h4></td>
+						<td style="text-align:center;vertical-align:middle"><h4><?php echo StatCon($player['kills'],($player['playtime']/60)); ?></h4></td>
+						<td style="text-align:right;vertical-align:middle"><h4><?php echo PlaytimeCon(time() - $player['connect_time']); ?></h4></td>
 					</tr>
 <?php endforeach; ?>
 				</tbody>
 			</table>
-<?php include 'inc/footer.php'; ?>
 		</div>
+<?php include 'inc/footer.php'; ?>
 	</div>
+
 <script type="text/javascript">
 Morris.Bar ({
 	element: 'chart',

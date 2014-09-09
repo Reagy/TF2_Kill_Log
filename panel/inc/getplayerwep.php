@@ -108,21 +108,21 @@ foreach ($customkill as $key => $value) {
 							<tr>
 								<td><h5>Most Kills on</h5></td>
 								<td><h5><a href="player.php?id=<?php echo $highkills['victim']; ?>"><?php echo htmlentities($highkills['name']); ?></a></h5></td>
-								<td><h5><?php echo $highkills['total']; ?></h5></td>
+								<td><h5><?php echo number_format($highkills['total']); ?></h5></td>
 							</tr>
 							<tr>
 								<td><h5>Most Dominations on</h5></td>
 								<td><h5><a href="player.php?id=<?php echo $highdom['victim']; ?>"><?php echo htmlentities($highdom['name']); ?></a></h5></td>
-								<td><h5><?php echo $highdom['total']; ?></h5></td>
+								<td><h5><?php echo number_format($highdom['total']); ?></h5></td>
 							</tr>
 							<tr>
 								<td><h5>Most Deaths by</h5></td>
 								<td><h5><a href="player.php?id=<?php echo $highdeaths['attacker']; ?>"><?php echo htmlentities($highdeaths['name']); ?></a></h5></td>
-								<td><h5><?php echo $highdeaths['total']; ?></h5></td>
+								<td><h5><?php echo number_format($highdeaths['total']); ?></h5></td>
 							</tr>
 							<tr>
 								<td><h5>Highest Killstreak</h5></td>
-								<td colspan="2"><h5><?php echo $highks['wep_ks']; ?></h5></td>
+								<td colspan="2"><h5><?php echo number_format($highks['wep_ks']); ?></h5></td>
 							</tr>
 						</tbody>
 					</table>
@@ -133,7 +133,7 @@ foreach ($customkill as $key => $value) {
 <?php foreach ($customkill as $customkill): ?>
 							<tr>
 								<td><?php echo $customkill['customkill']; ?></td>
-								<td><?php echo $customkill['total']; ?></td>
+								<td><?php echo number_format($customkill['total']); ?></td>
 								<td><?php echo round($customkill['total']/$attacker['kills']*100,2)."%"; ?></td>
 							</tr>
 <?php endforeach ?>
@@ -146,11 +146,11 @@ foreach ($customkill as $key => $value) {
 				<h4>Player</h4>
 					<table class="table table-bordered table-striped table-condensed">
 						<tbody class="playermodal">
-							<tr><td><h5>Total Kills</h5></td><td><h5><?php echo $attacker['kills']; ?></h5></td></tr>
-							<tr><td><h5>Dominations</h5></td><td><h5><?php echo $attacker['dominated']; ?></h5></td></tr>
-							<tr><td><h5>Revenges</h5></td><td><h5><?php echo $attacker['revenge']; ?></h5></td></tr>
-							<tr><td><h5>Kills on Red</h5></td><td><h5><?php echo $attacker['red']; ?></h5></td></tr>
-							<tr><td><h5>Kills on Blue</h5></td><td><h5><?php echo $attacker['blue']; ?></h5></td></tr>
+							<tr><td><h5>Total Kills</h5></td><td><h5><?php echo number_format($attacker['kills']); ?></h5></td></tr>
+							<tr><td><h5>Dominations</h5></td><td><h5><?php echo number_format($attacker['dominated']); ?></h5></td></tr>
+							<tr><td><h5>Revenges</h5></td><td><h5><?php echo number_format($attacker['revenge']); ?></h5></td></tr>
+							<tr><td><h5>Kills on Red</h5></td><td><h5><?php echo number_format($attacker['red']); ?></h5></td></tr>
+							<tr><td><h5>Kills on Blue</h5></td><td><h5><?php echo number_format($attacker['blue']); ?></h5></td></tr>
 						</tbody>
 					</table>
 				</div>
@@ -158,11 +158,11 @@ foreach ($customkill as $key => $value) {
 				<h4>Enemy</h4>
 					<table class="table table-bordered table-striped table-condensed">
 						<tbody class="playermodal">
-							<tr><td><h5>Total Deaths</h5></td><td><h5><?php echo $victim['deaths']; ?></h5></td></tr>
-							<tr><td><h5>Dominated</h5></td><td><h5><?php echo $victim['dominated']; ?></h5></td></tr>
-							<tr><td><h5>Revenge Taken</h5></td><td><h5><?php echo $victim['revenge']; ?></h5></td></tr>
-							<tr><td><h5>Deaths on Red</h5></td><td><h5><?php echo $victim['red']; ?></h5></td></tr>
-							<tr><td><h5>Deaths on Blue</h5></td><td><h5><?php echo $victim['blue']; ?></h5></td></tr>
+							<tr><td><h5>Total Deaths</h5></td><td><h5><?php echo number_format($victim['deaths']); ?></h5></td></tr>
+							<tr><td><h5>Dominated</h5></td><td><h5><?php echo number_format($victim['dominated']); ?></h5></td></tr>
+							<tr><td><h5>Revenge Taken</h5></td><td><h5><?php echo number_format($victim['revenge']); ?></h5></td></tr>
+							<tr><td><h5>Deaths on Red</h5></td><td><h5><?php echo number_format($victim['red']); ?></h5></td></tr>
+							<tr><td><h5>Deaths on Blue</h5></td><td><h5><?php echo number_format($victim['blue']); ?></h5></td></tr>
 						</tbody>
 					</table>
 				</div>

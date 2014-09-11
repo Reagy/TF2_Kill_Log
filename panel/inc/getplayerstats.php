@@ -37,7 +37,9 @@ foreach ($slot as $key => $value) {
 }
 
 foreach ($slot as $key => $value) {
-	$slot[$key]['value'] = number_format($value['value']/$s_total*100,2);
+	if ($value['value'] != 0) {
+		$slot[$key]['value'] = number_format($value['value']/$s_total*100,2);
+	}
 }
 
 $database->query('SELECT `weapons`.`class` AS label, SUM(`kills`) AS value FROM `smalllog` 
@@ -52,7 +54,9 @@ foreach ($class as $key => $value) {
 }
 
 foreach ($class as $key => $value) {
-	$class[$key]['value'] = number_format($value['value']/$c_total*100,2);
+	if ($value['value'] != 0) {
+		$class[$key]['value'] = number_format($value['value']/$c_total*100,2);
+	}
 }
 
 $slots = json_encode($slot);
@@ -167,12 +171,12 @@ $classes = json_encode($class);
 										element: 'class',
 										data: <?php echo $classes; ?>,
 										colors: [
-											'#1abc9c',
-											'#2ecc71',
-											'#3498db',
-											'#e67e22',
-											'#f1c40f',
-											'#e74c3c'
+											'#112F41',
+											'#068587',
+											'#6FB07F',
+											'#FCB03C',
+											'#FC5B3F',
+											'#D73117'
 								  	],
 										formatter: function (y) { return y + "%" ;}
 									});

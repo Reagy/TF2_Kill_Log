@@ -1,6 +1,13 @@
 <?php 
 //Include Config
 include "inc/config.php";
+
+function Colors() {
+	$colors = array('#112F41','#068587','#6FB07F','#FCB03C','#FC5B3F','#D73117','#1ABC8F','#E98B39','#208E4E','#217DBB');
+	shuffle($colors);
+	return json_encode($colors);
+}
+
 ?>
 <?php include("inc/nav.php"); ?>
 		<div class="stats-body">
@@ -21,7 +28,8 @@ include "inc/config.php";
 				</div>
 			</div>
 			<br>
-			<div id='killers' style='height:300px;border-bottom:1px solid #222222;cursor:pointer'></div>
+			<div id="overlay"><i class="fa fa-spinner fa-spin fa-5x"></i></div>
+			<div id='killers' style='height:300px;cursor:pointer'></div>
 		</div>
 <?php include 'inc/footer.php'; ?>
 	</div>
@@ -32,8 +40,12 @@ include "inc/config.php";
 				dataType: 'json',
 				url: "inc/gettoprange.php", // This is the URL to the API
 				data: "id=" + dates,
+				beforeSend: function(){
+					$('#overlay').fadeIn("fast");
+				},
 				success: function(msg){
 					chart.setData(msg);
+					$('#overlay').delay(400).fadeOut( "slow" );
 				}
 			})
 		}
@@ -52,7 +64,11 @@ include "inc/config.php";
 			endDate: moment()
 		},
 		function(start, end) {
-			$('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+			if (start.format('MMMM D, YYYY') == end.format('MMMM D, YYYY')) {
+				$('#reportrange span').html(start.format('MMMM D, YYYY'));
+			} else {
+				$('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+			}
 		}
 	);
 	$('#reportrange').on('apply.daterangepicker', function(ev, picker) {
@@ -66,7 +82,17 @@ include "inc/config.php";
 		ykeys: ['kills'],
 		labels: ['Kills'],
 		gridTextColor: ['#222222'],
-		barColors: ['#222222', '#e74c3c', '#c0392b'],
+	  barColors: function (row, series, type) {
+	    if (type === 'bar') {
+	      var colors = <?php echo Colors(); ?>;
+	      for(var i=0, l = colors.length; i < l; i++){
+				  return colors[row.x];
+				}
+	    }
+	    else {
+	      return '#222';
+	    }
+	  },
 		barRatio: 0.4,
 		barSizeRatio: 0.66,
 		xLabelAngle: 0,

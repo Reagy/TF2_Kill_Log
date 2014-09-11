@@ -40,7 +40,7 @@ foreach ($log as $key => $value) {
 
 <?php $i=1; ?>
 <?php foreach ($log as $log): ?>
-								<div class="col-md-3 col-sm-4 col-xs-6 getweapon" style="border:1px solid #000000;height:100px" data-toggle="tooltip" data-placement="top" title="<?php echo $log['name']; ?>">
+								<div class="col-md-3 col-sm-4 col-xs-6 getweapon" data-toggle="tooltip" data-placement="top" title="<?php echo $log['name']; ?>">
 									<div class="row">
 										<div class="pull-left">
 											<span class='fa-stack fa-2x'>

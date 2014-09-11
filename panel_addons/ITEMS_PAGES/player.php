@@ -42,7 +42,7 @@ $url = "http://steamcommunity.com/profiles/".$communityID;
 
 ?>
 <?php include("inc/nav.php"); ?>
-		<div id="body" style="background-color:#f5f5f5;height:100%;border:1px solid #222222;margin-bottom:-10px">
+		<div id="body" class="stats-body">
 			<div class="row">
 				<div class="col-sm-3 hidden-xs">
 					<div id="affixed" class="profile-nav">
@@ -87,7 +87,7 @@ $url = "http://steamcommunity.com/profiles/".$communityID;
 						</div>
 					</div>
 				</div>
-				<div class="col-sm-9">
+				<div class="col-sm-9" style="margin-bottom:25px">
 					<div style="padding-top:20px;padding-right:25px">
 						<ul class="nav nav-tabs nav-justified" role="tablist" data-tabs="tabs">
 							<li id="getplayerstats" class="active"><a href="#" data-toggle="tab">Player Stats</a></li>
@@ -100,80 +100,7 @@ $url = "http://steamcommunity.com/profiles/".$communityID;
 						</ul>
 						<div>
 							<div id="content" class="panel-body" style="padding:0px">
-								<table class="table table-bordered table-striped table-hover table-condensed display">
-									<thead>
-										<tr>
-											<th>Stat</th>
-											<th>Total</th>
-										</tr>
-									</thead>
-									<tbody>
-									<tr>
-											<td>Total Playtime</td>
-											<td><?php echo PlaytimeCon($player['playtime']); ?></td>
-										</tr>
-										<tr>
-											<td>Total Kills</td>
-											<td><?php echo $player['kills']; ?></td>
-										</tr>
-										<tr>
-											<td>Total Deaths</td>
-											<td><?php echo $player['deaths']; ?></td>
-										</tr>
-										<tr>
-											<td>Total Assists</td>
-											<td><?php echo $player['assists']; ?></td>
-										</tr>
-										<tr>
-											<td>Total Dominations</td>
-											<td><?php echo $player['dominations']; ?></td>
-										</tr>
-										<tr>
-											<td>Total Revenges</td>
-											<td><?php echo $player['revenges']; ?></td>
-										</tr>
-										<tr>
-											<td>Total Headshots</td>
-											<td><?php echo $player['headshots']; ?></td>
-										</tr>
-										<tr>
-											<td>Total Backstabs</td>
-											<td><?php echo $player['backstabs']; ?></td>
-										</tr>
-										<tr>
-											<td>Total Objects Built</td>
-											<td><?php echo $player['obj_built']; ?></td>
-										</tr>
-										<tr>
-											<td>Total Objects Destroyed</td>
-											<td><?php echo $player['obj_destroy']; ?></td>
-										</tr>
-										<tr>
-											<td>Total Players Teleported</td>
-											<td><?php echo $player['tele_player']; ?></td>
-										</tr>
-										<tr>
-											<td>Total CTF Picked</td>
-											<td><?php echo $player['flag_pick']; ?></td>
-										</tr>
-										<tr>
-											<td>Total CTF Captured</td>
-											<td><?php echo $player['flag_cap']; ?></td>
-										</tr>
-										<tr>
-											<td>Total CTF Defended</td>
-											<td><?php echo $player['flag_def']; ?></td>
-										</tr>
-										<tr>
-											<td>Total CP Captured</td>
-											<td><?php echo $player['cp_cap']; ?></td>
-										</tr>
-										<tr>
-											<td>Total CP Blocked</td>
-											<td><?php echo $player['cp_block']; ?></td>
-										</tr>
-									</tbody>
-								</table>
+
 							</div>
 						</div>
 					</div>
@@ -183,11 +110,17 @@ $url = "http://steamcommunity.com/profiles/".$communityID;
 <?php include "inc/footer.php"; ?>
 	</div>
 <script>
+$(document).ready(function() {
+	$("#content").load("inc/getplayerstats.php?id=<?php echo $_GET['id']; ?>");
+});
 $('.nav-tabs').on("click","li",function(){
 	$.ajax({
 		type: "GET",
 		url: "inc/"+$(this).attr('id')+".php",
 		data: 'id=<?php echo $_GET["id"] ?>',
+		beforeSend: function(){
+			$('#content').empty();
+		},
 		success: function(msg){
 			$('#content').html(msg);
 		}

@@ -74,7 +74,7 @@ foreach ($log as $key => $value) {
 								</thead>
 								<tbody>
 <?php foreach ($log as $log): ?>
-									<tr class="getweapon">
+									<tr class="weplist">
 										<td>
 											<img src="<?php echo $log['image']; ?>" alt="<?php echo $log['weapon']; ?>">
 											<input type="hidden" value="<?php echo $log['weapon']; ?>"/>

@@ -198,7 +198,38 @@ td a:active {
 }
 
 .getweapon {
+  border:1px dotted #222222;
+  height:100px;
   cursor: pointer;
+}
+
+.weplist > div {
+  cursor: pointer;
+}
+
+.getmap {
+  border-top:1px solid #000000;
+  cursor:pointer;
+  margin-bottom:25px;
+  padding:10px 30px;
+}
+
+.getstreak {
+  border-top:1px solid #000000;
+  border-right:1px solid #000000;
+  height:125px;
+  cursor:pointer;
+}
+
+@media (max-width: 768px) {
+  .getstreak {
+    border-right:0px;
+  }
+
+}
+
+.getstreak:nth-child(3n+3) {  
+  border-right:0px solid #000000;
 }
 
 .jumbotron {
@@ -394,6 +425,28 @@ border-bottom-left-radius: 30px;
 }
 .tooltip.top .tooltip-arrow {
       border-top-color: #e74c3c;
+}
+
+#overlay {
+  position:absolute; 
+  width:100%;
+  height:100%;
+  background-color:rgba(245,245,245,.80);
+  text-align:center;
+  z-index:999;
+  display:none;
+}
+
+#overlay i {
+  position: fixed;
+  top: 49%;
+  left: 49%;
+  margin:auto;
+  color:#222222;
+  filter: alpha(opacity=80);
+  -moz-opacity: 0.80;
+  opacity: 0.80;
+  z-index:999;
 }
 
 .nav-tabs {

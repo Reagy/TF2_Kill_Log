@@ -96,7 +96,6 @@ $url = "http://steamcommunity.com/profiles/".$communityID;
 							<li id="getplayerteam"><a href="#" data-toggle="tab">Team</a></li>
 							<li id="getplayerlog"><a href="#" data-toggle="tab">Kill Log</a></li>
 							<li id="getplayerhistory"><a href="#" data-toggle="tab">History</a></li>
-							<li id="getplayeritemlist"><a href="#" data-toggle="tab">Items</a></li>
 						</ul>
 						<div>
 							<div id="content" class="panel-body" style="padding:0px">

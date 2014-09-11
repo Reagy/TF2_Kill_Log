@@ -72,7 +72,7 @@ if (isset($list)) {
 	</thead>
 	<tbody>
 <?php foreach ($list as $list): ?>
-		<tr class="getweapon">
+		<tr class="weplist">
 			<td>
 				<img src="<?php echo $list['image']; ?>" alt="<?php echo $list['weapon']; ?>">
 				<input type="hidden" value="<?php echo $list['weapon']; ?>"/>

@@ -30,7 +30,7 @@ foreach ($log as $key => $value) {
 	<div class="stats-body">
 		<div class="panel-body" style="padding:0px;">
 <?php foreach ($log as $log): ?>
-			<div class="col-sm-4 getstreak" style="border:1px solid #000000;height:125px;cursor:pointer">
+			<div class="col-sm-4 getstreak">
 				<input type="hidden" value="<?php echo $log['weapon']; ?>"/>
 				<div class="row">
 					<div class="pull-left">

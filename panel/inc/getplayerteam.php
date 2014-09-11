@@ -42,7 +42,7 @@ foreach ($events as $key => $value) {
 								<h1>Control Point</h1>
 <?php if (isset($cp)): ?>
 <?php foreach ($cp as $cp): ?>
-								<div class="col-sm-3" style="border:1px solid #000000;height:100px">
+								<div class="col-sm-3 getweapon">
 									<div class="row">
 										<div class="pull-left">
 											<span class='fa-stack fa-2x'>

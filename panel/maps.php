@@ -18,7 +18,7 @@ $i = 1;
 	<div class="stats-body">
 		<div class="panel-body" style="padding:0px;">
 <?php foreach ($log as $log): ?>
-			<div class="col-sm-12 getstreak" style="border:1px solid #000000;height:125px;cursor:pointer">
+			<div class="col-sm-12 getmap">
 				<input type="hidden" value="<?php echo $log['name']; ?>"/>
 				<div class="row">
 					<div class="pull-left">

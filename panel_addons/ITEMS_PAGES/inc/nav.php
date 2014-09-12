@@ -46,6 +46,7 @@
 					<li><a href="actions.php">Actions</a></li>
 					<li><a href="streaks.php">Killstreaks</a></li>
 					<li><a href="maps.php">Maps</a></li>
+					<li><a href="top.php">Top 10</a></li>
 					<li><a href="items.php">Items</a></li>
 				</ul>
 			</div><!-- /.navbar-collapse -->

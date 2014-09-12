@@ -107,7 +107,7 @@ foreach ($log as $key => $value) {
 <?php include 'inc/footer.php'; ?>
 	</div>
 <script>
-$(document).on("click",".getweapon",function(){
+$(document).on("click",".weplist",function(){
 	$.ajax({
 		type: "GET",
 		url: "inc/getwep.php",
@@ -142,30 +142,6 @@ function affixWidth() {
 
 $(document).ready(function () {
 	affixWidth();
-});
-</script>
-<script>
-
-function affixWidth() {
-	var affix = $('#affixed');
-	var width = affix.width();
-	affix.width(width);
-}
-
-$(window).on('load resize', function(){
-	$('#affixed').affix({
-		offset: { 
-			top: $('#body').offset().top,
-			bottom: 120
-		}
-	});
-
-	affixWidth();
-	var w = $(window).width();
-	var h = $(window).height();
-
-	$('#result').height(h);
-	$('#affixed').height(h);
 });
 </script>
 </body>

@@ -15,7 +15,7 @@ $log = $database->resultset();
 ?>
 
 <?php include("inc/nav.php"); ?>
-		<div style="background-color:#f5f5f5;height:100%;border:1px solid #222222">
+		<div class="stats-body">
 			<table class="table table-condensed" style="text-align:center;margin-top:10px">
 				<tbody>
 					<tr>
@@ -33,24 +33,22 @@ $log = $database->resultset();
 				<h1>Last 100 Items</h1>
 			</div>
 <?php foreach ($log as $log): ?>
-				<div class="col-sm-2 getitem" style="cursor:pointer;">
-					<input type="hidden" value="<?php echo $log['index']; ?>"/>
-					<div class="row">
-						<div style="background-color:<?php echo Quality($log['quality']); ?>;border-radius:4px;border:2px solid #222222;margin:5px">
-							<img width="80" height="80" src="<?php echo $log['image']; ?>">
-							<span class="fa-stack fa-lg fa-2x">
-								<i class="fa fa-circle-thin fa-stack-2x"></i>
-								<i style='font-size:18px;color:#ecf0f1' class='fa-stack-1x'><?php echo $log['found']; ?></i>
-							</span>
-						</div>
+			<div class="col-sm-2 getitem" style="cursor:pointer;">
+				<input type="hidden" value="<?php echo $log['index']; ?>"/>
+				<div class="row">
+					<div style="background-color:<?php echo Quality($log['quality']); ?>;border-radius:4px;border:2px solid #222222;margin:5px">
+						<img width="80" height="80" src="<?php echo $log['image']; ?>">
+						<span class="fa-stack fa-lg fa-2x">
+							<i class="fa fa-circle-thin fa-stack-2x"></i>
+							<i style='font-size:18px;color:#ecf0f1' class='fa-stack-1x'><?php echo $log['found']; ?></i>
+						</span>
 					</div>
 				</div>
-<?php endforeach ?>
 			</div>
+<?php endforeach ?>
 		</div>
 <?php include "inc/footer.php"; ?>
 	</div>
-</div>
 <!-- Modal -->
 <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 

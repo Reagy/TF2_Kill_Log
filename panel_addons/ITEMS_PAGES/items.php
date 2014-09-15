@@ -47,8 +47,8 @@ $log = $database->resultset();
 			</div>
 <?php endforeach ?>
 		</div>
-<?php include "inc/footer.php"; ?>
 	</div>
+<?php include "inc/footer.php"; ?>
 <!-- Modal -->
 <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 

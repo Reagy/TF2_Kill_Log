@@ -80,7 +80,7 @@ if (isset($list)) {
 				<span><?php echo $list['name']; ?></span>
 			</td>
 			<td>
-				<h4><?php echo $list['kills']; ?></h4>
+				<h4><?php echo number_format($log['kills']); ?></h4>
 			</td>
 		</tr>
 <?php endforeach ?>

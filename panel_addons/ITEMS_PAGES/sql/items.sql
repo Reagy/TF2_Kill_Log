@@ -2510,6 +2510,3 @@ INSERT INTO `items` (`index`, `name`, `image`, `class`, `slot`) VALUES
 (30534, 'Immobile Suit', 'http://media.steampowered.com/apps/440/icons/sf14_heavy_robo_chest.fed298ae9b3b636fffe448428797cb788b5cd80f.png', 'Heavy', 'misc'),
 (30535, 'Kritz Or Treat Canteen', 'http://media.steampowered.com/apps/440/icons/kritz_or_treat_canteen.802b6c0b8cb4176a37506f10dd5d5228b562fb75.png', 'All', 'action'),
 (30536, 'Cursed Cruise', 'http://media.steampowered.com/apps/440/icons/sf14_cursed_cruise.91e90bf9e5b853bf9d17be151e934d923416eb07.png', 'All', 'misc');
-
-ALTER TABLE `items`
- ADD PRIMARY KEY (`index`), ADD KEY `class` (`class`), ADD KEY `slot` (`slot`);

@@ -217,7 +217,9 @@ INSERT INTO `weapons` (`id`, `index`, `name`, `weapon`, `slot`, `class`, `image`
 (208, NULL, 'Deflected Cow Mangler 5000', 'tf_projectile_energy_ball', 'Primary', 'Pyro', 'images/weaponicons/Killicon_skull.png'),
 (209, NULL, 'Suicide', 'player', NULL, 'Scout, Sniper, Soldier, Demoman, Medic, Heavy, Pyro, Spy, Engineer', 'images/weaponicons/Killicon_skull.png'),
 (210, NULL, 'Deflected Repair Claws', 'rescue_ranger_reflect', 'Primary', 'Pyro', 'images/weaponicons/Killicon_deflect_repair_claws.png'),
-(211, NULL, 'Deflected Cannonballs', 'loose_cannon_reflect', 'Primary', 'Pyro', 'images/weaponicons/Killicon_deflect_cannonballs.png');
+(211, NULL, 'Deflected Cannonballs', 'loose_cannon_reflect', 'Primary', 'Pyro', 'images/weaponicons/Killicon_deflect_cannonballs.png'),
+(212, 1123, 'Necro Smasher', 'necro_smasher', 'Melee', 'Scout, Sniper, Soldier, Demoman, Medic, Heavy, Pyro, Engineer', 'images/weaponicons/Killicon_necro_smasher.png'),
+(213, 30474, 'The Nostromo Napalmer', 'ai_flamethrower', 'Primary', 'Pyro', 'images/weaponicons/Killicon_nostromo_napalmer.png');
 
 
 ALTER TABLE `weapons`

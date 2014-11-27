@@ -10,7 +10,7 @@
 #include <updater>
 
 #define UPDATE_URL		"https://raw.githubusercontent.com/Sinclair47/TF2_Kill_Log/master/klog.txt"
-#define PLUGIN_VERSION "0.9.33"
+#define PLUGIN_VERSION "0.9.8"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 
@@ -22,7 +22,6 @@ new Handle:version = INVALID_HANDLE;
 new bool:g_ExLogEnabled = false;
 new g_ConnectTime[MAXPLAYERS + 1];
 new g_RowID[MAXPLAYERS + 1] = {-1, ...};
-//new g_DuelStatus[MAXPLAYERS + 1];
 new g_MapTime = 0;
 new g_MapPlaytime = 0;
 new g_MapKills = 0;
@@ -334,6 +333,9 @@ public OnRowInserted(Handle:owner, Handle:hndl, const String:error[], any:userid
 }
 
 public OnRowUpdated(Handle:owner, Handle:hndl, const String:error[], any:client) {
+	if (!IsValidClient(user)){
+		return;
+	}
 	if(hndl == INVALID_HANDLE) {
 		LogError("Unable to update row %L. %s", client, error);
 		return;
@@ -640,35 +642,6 @@ public Action:Event_teamplay_capture_blocked(Handle:hEvent, const String:name[],
 	}
 }
 
-public Action:Event_duel_status(Handle:hEvent, const String:name[], bool:dontBroadcast) {
-	new String:iID[64],String:tID[64];
-	new initiator = GetEventInt(hEvent, "initiator");
-	new target = GetEventInt(hEvent, "target");
-
-	GetClientAuthString(initiator, iID, sizeof(iID));
-	GetClientAuthString(target, tID, sizeof(tID));
-
-	new initiatorScore = GetEventInt(hEvent, "initiator_score");
-	new targetScore = GetEventInt(hEvent, "target_score");
-
-/*	if (g_DuelStatus[initiator] <= 1 || g_DuelStatus[target] <= 1) {
-		g_DuelStatus[initiator] == Format(duelid, sizeof(duelid), "%s_%s_%i",iID,tID,GetTime());
-		g_DuelStatus[target] == Format(duelid, sizeof(duelid), "%s_%s_%i",iID,tID,GetTime());
-	}*/
-
-	new len = 0;
-	decl String:query[1024];
-	len += Format(query[len], sizeof(query)-len, "INSERT INTO `duellog` (`initiator`, `target`, `i_score`, `t_score`, `time`)");
-	len += Format(query[len], sizeof(query)-len, " VALUES ('%i', '%i', '%i', '%s', '%s');",iID,tID,initiatorScore,targetScore,GetTime());	
-	SQL_TQuery(g_dbKill, SQLError, query);
-}
-
-/*public Action:Event_player_team(Handle:hEvent, const String:name[], bool:dontBroadcast) {
-	new String:auth[64];
-	new userid = GetEventInt(hEvent, "userid");
-	GetClientAuthString(userid, auth, sizeof(auth));
-}*/
-
 stock bool:IsValidClient(client)
 {
 	if(client <= 0 || client > MaxClients || !IsClientInGame(client)) {
@@ -863,20 +836,6 @@ createDBMapLog() {
 	len += Format(query[len], sizeof(query)-len, "`cp_blocked` int(11) NOT NULL DEFAULT '0',");
 	len += Format(query[len], sizeof(query)-len, "`playtime` int(11) NOT NULL DEFAULT '0',");
 	len += Format(query[len], sizeof(query)-len, "UNIQUE KEY `name` (`name`)");
-	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-	SQL_FastQuery(g_dbKill, query);
-}
-
-createDBDuellog() {
-	new len = 0;
-	decl String:query[512];
-	len += Format(query[len], sizeof(query)-len, "CREATE TABLE IF NOT EXISTS `duellog` (");
-	len += Format(query[len], sizeof(query)-len, "`initiator` varchar(20) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`target` varchar(20) DEFAULT NULL,");
-	len += Format(query[len], sizeof(query)-len, "`i_score` int(11) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, "`t_score` int(11) DEFAULT '0',");
-	len += Format(query[len], sizeof(query)-len, " KEY `initiator` (`initiator`),");
-	len += Format(query[len], sizeof(query)-len, " KEY `target` (`target`)");
 	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 	SQL_FastQuery(g_dbKill, query);
 }

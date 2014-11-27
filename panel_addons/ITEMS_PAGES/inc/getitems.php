@@ -28,8 +28,8 @@ $item = $database->single();
  	<div class="modal-content">
 		<div class="modal-body">
 			<div style="padding:10px">
-				<h4 style="text-align:center"><?php echo $item['name']; ?> Found</h4>
-				<table id="log" class="table table-bordered table-striped table-condensed" style="cursor:pointer">
+				<h4 style="text-align:center"><?php echo $item['name']; ?></h4>
+				<table id="list" class="table table-bordered table-striped table-condensed" style="cursor:pointer">
 					<thead>
 						<tr>
 							<th>Player</th>
@@ -51,7 +51,7 @@ $item = $database->single();
 </div>
 <script>
 $(document).ready(function() {
-	var items = $('#log').DataTable( {
+	var list = $('#list').DataTable( {
 		"processing": false,
 		"serverSide": true,
 		"ajax": "inc/server_processing.php?id=<?php echo $id; ?>&type=getitems",
@@ -60,14 +60,14 @@ $(document).ready(function() {
 		"columns": [
 			{ "data": "name" },
 			{ "data": "auth", "visible" : false },
-			{ "data": "quality" },
-			{ "data": "method" },
+			{ "data": "quality_text" },
+			{ "data": "method_text" },
 			{ "data": "time" }
 		],
-		"order": [[2, 'desc']]
+		"order": [[4, 'desc']]
 	});
-	$('#log tbody').on('click', 'tr', function () {
-			window.location = "player.php?id="+items.cell(this, 1).data();
+	$('#list tbody').on('click', 'tr', function () {
+			window.location = "player.php?id="+list.cell(this, 1).data();
 	});
 });
 </script>

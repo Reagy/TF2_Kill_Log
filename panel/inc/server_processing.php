@@ -356,18 +356,12 @@ if (isset($_GET['type']) && $_GET['type'] == 'getitems') {
         array(
             'db'        => 'itemlog.quality',
             'dt'        => 'quality',
-            'field'     => 'quality',
-            'formatter' => function( $d, $row ) {
-                return QualityText($d,'text');
-            }
+            'field'     => 'quality'
         ),
         array(
             'db'        => 'itemlog.method',
             'dt'        => 'method',
-            'field'     => 'method',
-            'formatter' => function( $d, $row ) {
-                return Method($d);
-            }
+            'field'     => 'method'
         ),
         array(
             'db'        => 'itemlog.time',
@@ -376,6 +370,26 @@ if (isset($_GET['type']) && $_GET['type'] == 'getitems') {
             'formatter' => function( $d, $row ) {
                 return date("m/d/y, g:i a", $d);
             }
+        ),
+        array(
+            'db'        => 'items_quality.quality_type',
+            'dt'        => 'quality_type',
+            'field'     => 'quality_type'
+        ),
+        array(
+            'db'        => 'items_quality.quality_text',
+            'dt'        => 'quality_text',
+            'field'     => 'quality_text'
+        ),
+        array(
+            'db'        => 'items_method.method_type',
+            'dt'        => 'method_type',
+            'field'     => 'method_type'
+        ),
+        array(
+            'db'        => 'items_method.method_text',
+            'dt'        => 'method_text',
+            'field'     => 'method_text'
         ),
         array(
             'db'        => 'playerlog.name',
@@ -388,11 +402,112 @@ if (isset($_GET['type']) && $_GET['type'] == 'getitems') {
     );
 
     $extraCondition = "`index` = ".$_GET['id'];
-    $joinQuery = "FROM `itemlog` INNER JOIN `playerlog` ON (itemlog.`auth` = playerlog.`auth`)";
+    $joinQuery = "FROM `itemlog` INNER JOIN `playerlog` ON itemlog.`auth` = playerlog.`auth` INNER JOIN items_quality ON itemlog.`quality` = items_quality.`quality_type` LEFT JOIN items_method ON itemlog.`method` = items_method.`method_type`";
 
     require('ssp.class.php');
 
     echo json_encode(
         SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraCondition)
+    );
+}
+
+if (isset($_GET['type']) && $_GET['type'] == 'allitems') {
+
+    $table = 'itemlog';
+    $primaryKey = 'time';
+     
+    $columns = array(
+        array(
+            'db'        => 'itemlog.index',
+            'dt'        => 'index',
+            'field'     => 'index'
+        ),
+        array(
+            'db'        => 'itemlog.quality',
+            'dt'        => 'quality',
+            'field'     => 'quality'
+        ),
+        array(
+            'db'        => 'itemlog.method',
+            'dt'        => 'method',
+            'field'     => 'method'
+        ),
+        array(
+            'db'        => 'itemlog.time',
+            'dt'        => 'time',
+            'field'     => 'time',
+            'formatter' => function( $d, $row ) {
+                return ($d == 0 ? "Unknown" : date( 'Y-m-d', $d));
+            }
+        ),
+        array(
+            'db'        => 'items.index',
+            'dt'        => 'index',
+            'field'     => 'index'
+        ),
+        array(
+            'db'        => 'items.name',
+            'dt'        => 'name',
+            'field'     => 'name',
+            'formatter' => function( $d, $row ) {
+                return htmlentities($d);
+            }
+        ),
+        array(
+            'db'        => 'items.image',
+            'dt'        => 'image',
+            'field'     => 'image',
+            'formatter' => function( $d, $row ) {
+                return htmlentities($d);
+            }
+        ),
+        array(
+            'db'        => 'items.class',
+            'dt'        => 'class',
+            'field'     => 'class'
+        ),
+        array(
+            'db'        => 'items.slot',
+            'dt'        => 'slot',
+            'field'     => 'slot'
+        ),
+        array(
+            'db'        => 'items.type',
+            'dt'        => 'type',
+            'field'     => 'type'
+        ),
+        array(
+            'db'        => 'items_quality.quality_type',
+            'dt'        => 'quality_type',
+            'field'     => 'quality_type'
+        ),
+        array(
+            'db'        => 'items_quality.quality_text',
+            'dt'        => 'quality_text',
+            'field'     => 'quality_text'
+        ),
+        array(
+            'db'        => 'items_quality.quality_color',
+            'dt'        => 'quality_color',
+            'field'     => 'quality_color'
+        ),
+        array(
+            'db'        => 'items_method.method_type',
+            'dt'        => 'method_type',
+            'field'     => 'method_type'
+        ),
+        array(
+            'db'        => 'items_method.method_text',
+            'dt'        => 'method_text',
+            'field'     => 'method_text'
+        )
+    );
+
+    $joinQuery = "FROM itemlog INNER JOIN items ON itemlog.`index` = items.`index` INNER JOIN items_quality ON itemlog.`quality` = items_quality.`quality_type` LEFT JOIN items_method ON itemlog.`method` = items_method.`method_type`";
+
+    require('ssp.class.php');
+
+    echo json_encode(
+        SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery)
     );
 }

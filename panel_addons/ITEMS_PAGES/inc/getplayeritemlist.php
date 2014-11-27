@@ -15,8 +15,7 @@ include 'database.class.php';
 // Instantiate database.
 $database = new Database();
 
-$database->query('SELECT itemlog.*, items.*, COUNT(itemlog.`index`) AS found FROM itemlog INNER JOIN items
-	ON itemlog.`index` = items.`index` WHERE `auth` = :id GROUP BY itemlog.`index`, itemlog.`quality` ORDER BY found DESC');
+$database->query('SELECT itemlog.*, items.*, items_quality.*, COUNT(itemlog.`index`) AS found FROM itemlog INNER JOIN items ON itemlog.`index` = items.`index` INNER JOIN items_quality ON itemlog.`quality` = items_quality.`quality_type` WHERE `auth` = :id GROUP BY itemlog.`index`, itemlog.`quality` ORDER BY found DESC');
 $database->bind(':id', $_GET['id']);
 $log = $database->resultset();
 
@@ -26,7 +25,7 @@ $log = $database->resultset();
 <div class="col-sm-3 getitem">
 	<input type="hidden" value="<?php echo $log['index']; ?>"/>
 	<div class="row">
-		<div style="background-color:<?php echo Quality($log['quality']); ?>;border-radius:4px;border:2px solid #222222;margin:5px">
+		<div style="background-color:<?php echo $log['quality_color']; ?>;border-radius:4px;border:2px solid #222222;margin:5px">
 			<div class="pull-left">
 				<span class="fa-stack fa-lg fa-2x">
 					<i class="fa fa-circle-thin fa-stack-2x"></i>

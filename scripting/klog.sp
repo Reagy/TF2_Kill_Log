@@ -10,7 +10,7 @@
 #include <updater>
 
 #define UPDATE_URL		"https://raw.githubusercontent.com/Sinclair47/TF2_Kill_Log/master/klog.txt"
-#define PLUGIN_VERSION "0.9.8"
+#define PLUGIN_VERSION "0.9.9"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 
@@ -333,7 +333,7 @@ public OnRowInserted(Handle:owner, Handle:hndl, const String:error[], any:userid
 }
 
 public OnRowUpdated(Handle:owner, Handle:hndl, const String:error[], any:client) {
-	if (!IsValidClient(user)){
+	if (!IsValidClient(client)){
 		return;
 	}
 	if(hndl == INVALID_HANDLE) {

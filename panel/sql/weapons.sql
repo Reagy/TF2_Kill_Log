@@ -1,8 +1,9 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
+DROP TABLE IF EXISTS `weapons`;
 CREATE TABLE IF NOT EXISTS `weapons` (
-`id` int(11) NOT NULL,
+	`id` int(11) NOT NULL,
   `index` int(6) DEFAULT NULL,
   `name` varchar(150) DEFAULT NULL,
   `weapon` varchar(150) DEFAULT NULL,
@@ -227,4 +228,4 @@ ALTER TABLE `weapons`
 
 
 ALTER TABLE `weapons`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=212;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=214;

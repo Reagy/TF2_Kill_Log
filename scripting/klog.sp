@@ -10,7 +10,7 @@
 #include <updater>
 
 #define UPDATE_URL		"https://raw.githubusercontent.com/Sinclair47/TF2_Kill_Log/master/klog.txt"
-#define PLUGIN_VERSION "0.9.9"
+#define PLUGIN_VERSION "0.9.10"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 
@@ -80,8 +80,6 @@ public OnPluginStart() {
 	HookEvent("object_destroyed", Event_object_destroyed);
 	HookEvent("player_builtobject", Event_player_builtobject);
 	HookEvent("player_teleported", Event_player_teleported);
-	HookEvent("duel_status", Event_duel_status);
-	/*HookEvent("player_team", Event_player_team);*/
 
 	if (LibraryExists("updater")) {
 		Updater_AddPlugin(UPDATE_URL);
@@ -165,7 +163,6 @@ public connectDB(Handle:owner, Handle:hndl, const String:error[], any:data) {
 		createDBTeamLog();
 		createDBObjectLog();
 		createDBMapLog();
-		createDBDuellog();
 		CreateTimer(300.0, Timer_HandleUpdate, INVALID_HANDLE, TIMER_REPEAT);
 	}
 }

@@ -1,17 +1,19 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
 
 DROP TABLE IF EXISTS `weapons`;
 CREATE TABLE IF NOT EXISTS `weapons` (
-	`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `index` int(6) DEFAULT NULL,
   `name` varchar(150) DEFAULT NULL,
   `weapon` varchar(150) DEFAULT NULL,
   `slot` varchar(12) DEFAULT NULL,
   `class` varchar(70) DEFAULT NULL,
-  `image` varchar(150) DEFAULT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=212 ;
+  `image` varchar(150) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `weapon` (`weapon`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=218 ;
 
+TRUNCATE TABLE `weapons`;
 INSERT INTO `weapons` (`id`, `index`, `name`, `weapon`, `slot`, `class`, `image`) VALUES
 (1, 2, 'Fire Axe', 'fireaxe', 'Melee', 'Pyro', 'images/weaponicons/Killicon_fireaxe.png'),
 (2, 8, 'Bonesaw ', 'bonesaw', 'Melee', 'Medic', 'images/weaponicons/Killicon_bonesaw.png'),
@@ -221,11 +223,7 @@ INSERT INTO `weapons` (`id`, `index`, `name`, `weapon`, `slot`, `class`, `image`
 (211, NULL, 'Deflected Cannonballs', 'loose_cannon_reflect', 'Primary', 'Pyro', 'images/weaponicons/Killicon_deflect_cannonballs.png'),
 (212, 1123, 'Necro Smasher', 'necro_smasher', 'Melee', 'Scout, Sniper, Soldier, Demoman, Medic, Heavy, Pyro, Engineer', 'images/weaponicons/Killicon_necro_smasher.png'),
 (213, 30474, 'The Nostromo Napalmer', 'ai_flamethrower', 'Primary', 'Pyro', 'images/weaponicons/Killicon_nostromo_napalmer.png'),
-(214, 1127, 'The Crossing Guard', 'crossing_guard', 'Melee', 'Scout, Sniper, Soldier, Demoman, Medic, Heavy, Pyro', 'images/weaponicons/Killicon_crossing_guard.png');
-
-ALTER TABLE `weapons`
- ADD PRIMARY KEY (`id`);
-
-
-ALTER TABLE `weapons`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=214;
+(214, 1127, 'The Crossing Guard', 'crossing_guard', 'Melee', 'Scout, Sniper, Soldier, Demoman, Medic, Heavy, Pyro', 'images/weaponicons/Killicon_crossing_guard.png'),
+(215, 1150, 'The Quickiebomb Launcher', 'quickiebomb_launcher', 'Secondary', 'Demoman', 'images/weaponicons/Killicon_quickiebomb_launcher.png'),
+(216, 1151, 'The Iron Bomber', 'iron_bomber', 'Primary', 'Demoman', 'images/weaponicons/Killicon_iron_bomber.png'),
+(217, 1153, 'Panic Attack Shotgun', 'panic_attack', 'Primary', 'Engineer, Pyro, Solider, Heavy', 'images/weaponicons/Killicon_panic_attack.png');

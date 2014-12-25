@@ -3,7 +3,7 @@ TF2_Kill_Log
 
 Sourcemod Plugin and Panel to track weapons, players, and events.
 
-Run sql scripts weapons and profiles.
+Click buttons install/index.php to add table entries or update items/weapons.
 
 Add database details to inc/config.
 Add Steam API key to inc/config.

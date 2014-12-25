@@ -42,3 +42,22 @@ $i = 1;
 	</div>
 <?php include "inc/footer.php"; ?>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="Maps" aria-hidden="true">
+
+</div>
+<script>
+$(document).on("click",".getmap",function(){
+	$('#modal').modal('show');
+	$.ajax({
+		type: "GET",
+		url: "inc/getmap.php",
+		data: 'id=' + $(this).find("input").val(),
+		success: function(msg){
+			$('#modal').html(msg);
+		}
+	});
+});
+</script>
+</body>
+</html>

@@ -54,7 +54,7 @@ foreach ($log as $key => $value) {
 <?php include "inc/footer.php"; ?>
 </div>
 <!-- Modal -->
-<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="Streaks" aria-hidden="true">
 
 </div>
 <script>

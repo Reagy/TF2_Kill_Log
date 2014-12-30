@@ -10,17 +10,28 @@
 #include <updater>
 
 #define UPDATE_URL		"https://raw.githubusercontent.com/Sinclair47/TF2_Kill_Log/master/klog.txt"
-#define PLUGIN_VERSION "0.9.10"
+#define PLUGIN_VERSION "0.10.5"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
+#define JUMP_NONE 0
+#define JUMP_EXPLOSIVE_START 1
+#define JUMP_EXPLOSIVE 2
+#define CUSTOMKILL_PARACHUTE 99
+#define CUSTOMKILL_JUMP 98
 
 new Handle:g_dbKill = INVALID_HANDLE;
 new Handle:g_Reconnect = INVALID_HANDLE;
 new Handle:g_ExLog = INVALID_HANDLE;
+new Handle:g_CleanUp_killlog = INVALID_HANDLE;
+new Handle:g_CleanUp_playerlog = INVALID_HANDLE;
+new Handle:g_CleanUp_span = INVALID_HANDLE;
 new Handle:g_URL = INVALID_HANDLE;
 new Handle:version = INVALID_HANDLE;
 new bool:g_ExLogEnabled = false;
+new bool:g_CleanUp_killlog_enabled = false;
+new bool:g_CleanUp_playerlog_enabled = false;
 new g_ConnectTime[MAXPLAYERS + 1];
+new jumpStatus[MAXPLAYERS + 1];
 new g_RowID[MAXPLAYERS + 1] = {-1, ...};
 new g_MapTime = 0;
 new g_MapPlaytime = 0;
@@ -34,6 +45,7 @@ new g_MapFD = 0;
 new g_MapFDrop = 0;
 new g_MapCPP = 0;
 new g_MapCPB = 0;
+new g_BossHealth = 0;
 
 enum _:playerTracker {
 	kills,
@@ -53,6 +65,15 @@ enum _:playerTracker {
 	flag_drop,
 	cp_captured,
 	cp_blocked,
+	steal_sandvich,
+	medic_defended,
+	stuns,
+	deflects,
+	soaks,
+	bossdmg,
+	hatman,
+	eyeboss,
+	merasmus,
 }
 
 new scores[MAXPLAYERS + 1][playerTracker];
@@ -69,6 +90,9 @@ public OnPluginStart() {
 	openDB();
 	CreateConVar("klog_v", PLUGIN_VERSION, "TF2 Kill Log", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	g_ExLog = CreateConVar("klog_extended", "1", "1 Enables / 0 Disables extended log features");
+	g_CleanUp_killlog = CreateConVar("klog_cleanup_killlog", "1", "1 Enables / 0 Disables purging killlog");
+	g_CleanUp_playerlog = CreateConVar("klog_cleanup_playerlog", "0", "1 Enables / 0 Disables purging playerlog");
+	g_CleanUp_span = CreateConVar("klog_cleanup_span", "8", "Delete old killlog entries after X amount of weeks", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	g_URL = CreateConVar("klog_url","","Kill Log URL, example: yoursite.com/stats/", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	AddCommandListener(Command_Say, "say");
 	AddCommandListener(Command_Say, "say_team");
@@ -80,6 +104,21 @@ public OnPluginStart() {
 	HookEvent("object_destroyed", Event_object_destroyed);
 	HookEvent("player_builtobject", Event_player_builtobject);
 	HookEvent("player_teleported", Event_player_teleported);
+
+	HookEvent("player_stealsandvich", Event_player_stealsandvich);
+	HookEvent("player_stunned", Event_player_stunned);
+	HookEvent("medic_defended", Event_medic_defended);
+	HookEvent("object_deflected", Event_object_deflected);
+	HookEvent("rocket_jump", Event_explosive_jump);
+	HookEvent("sticky_jump", Event_explosive_jump);
+	HookEvent("rocket_jump_landed", Event_jump_landed);
+	HookEvent("sticky_jump_landed", Event_jump_landed);
+	HookUserMessage(GetUserMessageId("PlayerJarated"), Event_PlayerJarated);
+
+	HookEvent("npc_hurt", Event_npc_hurt);
+	HookEvent("pumpkin_lord_killed", Event_pumpkin_lord_killed);
+	HookEvent("eyeball_boss_killed", Event_eyeball_boss_killed);
+	HookEvent("merasmus_killed", Event_merasmus_killed);
 
 	if (LibraryExists("updater")) {
 		Updater_AddPlugin(UPDATE_URL);
@@ -186,6 +225,7 @@ public OnClientConnected(client) {
 
 	g_ConnectTime[client] = GetTime();
 	g_RowID[client] = -1;
+	jumpStatus[client] = JUMP_NONE;
 }
 
 public OnClientAuthorized(client, const String:authid[]) {
@@ -268,6 +308,8 @@ public OnConfigsExecuted() {
 	version = FindConVar("klog_v");
 	SetConVarString(version,PLUGIN_VERSION,true,true);
 	g_ExLogEnabled = GetConVarBool(g_ExLog);
+	g_CleanUp_killlog_enabled = GetConVarBool(g_CleanUp_killlog);
+	g_CleanUp_playerlog_enabled = GetConVarBool(g_CleanUp_playerlog);
 }
 
 TagsCheck(const String:tag[])
@@ -313,6 +355,13 @@ public OnMapEnd() {
 	Format(query2, sizeof(query2), "INSERT INTO `maplog` SET `name` = '%s', `kills` = %i, `assists` = %i, `dominations` = %i, `revenges` = %i, `flag_pick` = %i, `flag_cap` = %i, `flag_def` = %i, `flag_drop` = %i, `cp_captured` = %i, `cp_blocked` = %i, `playtime` = %i ON DUPLICATE KEY UPDATE `kills` = `kills` +%i, `assists` = `assists` + %i, `dominations` = `dominations` +%i, `revenges` = `revenges` + %i, `flag_pick` = `flag_pick` +%i, `flag_cap` = `flag_cap` +%i, `flag_def` = `flag_def` +%i, `flag_drop` = `flag_drop` + %i, `cp_captured` = `cp_captured` + %i, `cp_blocked` = `cp_blocked` + %i, `playtime` = `playtime` + %d", 
 		mapName, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapPlaytime, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapPlaytime);
 	SQL_TQuery(g_dbKill, OnRowUpdated, query2);
+
+	if (g_CleanUp_killlog_enabled) {
+		cleanup_killlog();
+	}
+	if (g_CleanUp_playerlog_enabled){
+		cleanup_playerlog();
+	}
 }
 
 public OnRowInserted(Handle:owner, Handle:hndl, const String:error[], any:userid) {
@@ -378,6 +427,11 @@ public Event_player_death(Handle:hEvent, const String:name[], bool:dontBroadcast
 	GetEventString(hEvent, "weapon_logclassname", weapon, sizeof(weapon));
 	GetClientAuthString(attacker, aID, sizeof(aID));
 	GetClientAuthString(victim, vID, sizeof(vID));
+	
+	if (TF2_IsPlayerInCondition(attacker,TFCond_HalloweenKart)) {
+		weapon = "bumper_car";
+		customkill = 82;
+	}
 
 	if (deathflags & 32) {
 		scores[victim][feigns]++;
@@ -435,6 +489,15 @@ public Event_player_death(Handle:hEvent, const String:name[], bool:dontBroadcast
 
 	if (dmgtype & DMG_CRIT) {
 		dmg_crit = 1;
+	}
+
+	if (jumpStatus[attacker] == JUMP_EXPLOSIVE) {
+		if (TF2_IsPlayerInCondition(attacker, TFCond_Parachute)) {
+			customkill = CUSTOMKILL_PARACHUTE;
+		}
+		else {
+			customkill = CUSTOMKILL_JUMP;
+		}
 	}
 
 	if (g_ExLogEnabled) {
@@ -633,19 +696,127 @@ public Action:Event_teamplay_point_captured(Handle:hEvent, const String:name[], 
 public Action:Event_teamplay_capture_blocked(Handle:hEvent, const String:name[], bool:dontBroadcast) {
 	new client = GetEventInt(hEvent, "blocker");
 
-	if (client > 0) {
+	if (IsValidClient(client)) {
 		g_MapCPB++;
 		scores[client][cp_blocked]++;
 	}
 }
 
-stock bool:IsValidClient(client)
-{
+public Action:Event_player_stealsandvich(Handle:hEvent, const String:name[], bool:dontBroadcast) {
+	new client = GetClientOfUserId(GetEventInt(hEvent, "target"));
+
+	if (IsValidClient(client)) {
+		scores[client][steal_sandvich]++;
+	}
+}
+
+public Action:Event_medic_defended(Handle:hEvent, const String:name[], bool:dontBroadcast) {
+	new client = GetClientOfUserId(GetEventInt(hEvent, "userid"));
+
+	if (IsValidClient(client)) {
+		scores[client][medic_defended]++;
+	}
+}
+
+public Action:Event_player_stunned(Handle:hEvent, const String:name[], bool:dontBroadcast) {
+	new client = GetClientOfUserId(GetEventInt(hEvent, "stunner"));
+
+	if (IsValidClient(client)) {
+		scores[client][stuns]++;
+	}
+}
+
+public Action:Event_object_deflected(Handle:hEvent, const String:name[], bool:dontBroadcast) {
+	new client = GetClientOfUserId(GetEventInt(hEvent, "userid"));
+	new weaponid = GetEventInt(hEvent, "weaponid");
+
+	if (IsValidClient(client) && weaponid != 0) {
+		scores[client][deflects]++;
+	}
+}
+
+public Action:Event_PlayerJarated(UserMsg:msg_id, Handle:bf, const players[], playersNum, bool:reliable, bool:init) {
+	new client = BfReadByte(bf);
+	new victim = BfReadByte(bf);
+	
+	if (IsValidClient(client)) {
+		if (TF2_IsPlayerInCondition(victim, TFCond_Jarated) || TF2_IsPlayerInCondition(victim, TFCond_Milked)) {
+			scores[client][soaks]++;
+		}
+	}
+}
+
+public Event_explosive_jump(Handle:event, const String:name[], bool:dontBroadcast) {
+	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+	new status = jumpStatus[client];
+
+	if(status == JUMP_EXPLOSIVE_START)
+	{
+		jumpStatus[client] = JUMP_EXPLOSIVE;
+	}
+	else if(status != JUMP_EXPLOSIVE)
+		jumpStatus[client] = JUMP_EXPLOSIVE_START;
+}
+
+public Event_jump_landed(Handle:event, const String:name[], bool:dontBroadcast) {
+	jumpStatus[GetClientOfUserId(GetEventInt(event, "userid"))] = JUMP_NONE;
+}
+
+public Action:Event_npc_hurt(Handle:event, const String:name[], bool:dontBroadcast) {
+	new String:bossClass[24];
+	new boss = GetEventInt(event, "entindex");
+
+	GetEdictClassname(boss, bossClass, sizeof(bossClass));
+	g_BossHealth = GetEntProp(boss, Prop_Data, "m_iMaxHealth");
+
+	if (StrEqual("headless_hatman", bossClass) || StrEqual("eyeball_boss", bossClass) || StrEqual("merasmus", bossClass)) {
+		new client = GetClientOfUserId(GetEventInt(event, "attacker_player"));
+		if (IsValidClient(client)) {
+			scores[client][bossdmg] += GetEventInt(event, "damageamount");
+		}
+	}
+}
+
+public Action:Event_pumpkin_lord_killed(Handle:event, const String:name[], bool:dontBroadcast) {
+	for (new client = 1; client <= MaxClients; client++) {
+		if (IsValidClient(client)) {
+			if (scores[client][bossdmg] >= (g_BossHealth/6)) {
+				scores[client][hatman]++;
+			}
+			scores[client][bossdmg] = 0;
+		}
+	}
+}
+
+public Action:Event_eyeball_boss_killed(Handle:event, const String:name[], bool:dontBroadcast) {
+	for (new client = 1; client <= MaxClients; client++) {
+		if (IsValidClient(client)) {
+			if (scores[client][bossdmg] >= (g_BossHealth/6)) {
+				scores[client][eyeboss]++;
+			}
+			scores[client][bossdmg] = 0;
+		}
+	}
+}
+
+public Action:Event_merasmus_killed(Handle:event, const String:name[], bool:dontBroadcast) {
+	for (new client = 1; client <= MaxClients; client++) {
+		if (IsValidClient(client)) {
+			if (scores[client][bossdmg] >= (g_BossHealth/6)) {
+				scores[client][merasmus]++;
+			}
+			scores[client][bossdmg] = 0;
+		}
+	}
+}
+
+stock bool:IsValidClient(client) {
 	if(client <= 0 || client > MaxClients || !IsClientInGame(client)) {
 		return false;
 	}
 	return true;
 }
+
 
 updateMap(){
 	new String:mapName[MAX_LINE_WIDTH];
@@ -655,6 +826,28 @@ updateMap(){
 		mapName, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB, g_MapKills, g_MapAssists, g_MapDoms, g_MapRevs, g_MapFP, g_MapFC, g_MapFD, g_MapFDrop, g_MapCPP, g_MapCPB);
 	SQL_TQuery(g_dbKill, OnRowUpdated, query2);
 	PurgeMap();
+}
+
+//Adds disconnect time to "stuck" players
+updateTime() {
+	SQL_FastQuery(g_dbKill, "UPDATE `playerlog` SET disconnect_time = UNIX_TIMESTAMP(NOW()) WHERE disconnect_time = 0");
+}
+
+//Removes old entries as defined by g_CleanUp_span
+cleanup_killlog() {
+	decl String:query[2048];
+	Format(query, sizeof(query), "DELETE FROM killlog WHERE killtime <= UNIX_TIMESTAMP(DATE(NOW()) - INTERVAL %i WEEK)", GetConVarInt(g_CleanUp_span));
+	SQL_FastQuery(g_dbKill, query);
+}
+
+//Removes old entries as defined by g_CleanUp_span
+cleanup_playerlog() {
+	decl String:query[2048];
+	Format(query, sizeof(query), "DELETE FROM playerlog WHERE disconnect_time <= UNIX_TIMESTAMP(DATE(NOW()) - INTERVAL %i WEEK)", GetConVarInt(g_CleanUp_span));
+	SQL_FastQuery(g_dbKill, query);
+	SQL_FastQuery(g_dbKill, "DELETE FROM smalllog WHERE attacker NOT IN (SELECT pl.auth FROM playerlog pl)");
+	SQL_FastQuery(g_dbKill, "DELETE FROM objectlog WHERE attacker NOT IN (SELECT pl.auth FROM playerlog pl)");
+	SQL_FastQuery(g_dbKill, "DELETE FROM teamlog WHERE capper NOT IN (SELECT pl.auth FROM playerlog pl)");
 }
 
 PurgeClient(client) {
@@ -675,6 +868,15 @@ PurgeClient(client) {
 	scores[client][flag_drop] = 0;
 	scores[client][cp_captured] = 0;
 	scores[client][cp_blocked] = 0;
+	scores[client][steal_sandvich] = 0;
+	scores[client][medic_defended] = 0;
+	scores[client][stuns] = 0;
+	scores[client][deflects] = 0;
+	scores[client][soaks] = 0;
+	scores[client][bossdmg] = 0;
+	scores[client][hatman] = 0;
+	scores[client][eyeboss] = 0;
+	scores[client][merasmus] = 0;
 }
 
 PurgeMap() {
@@ -835,8 +1037,4 @@ createDBMapLog() {
 	len += Format(query[len], sizeof(query)-len, "UNIQUE KEY `name` (`name`)");
 	len += Format(query[len], sizeof(query)-len, ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 	SQL_FastQuery(g_dbKill, query);
-}
-
-updateTime() {
-	SQL_FastQuery(g_dbKill, "UPDATE `playerlog` SET disconnect_time = UNIX_TIMESTAMP(NOW()) WHERE disconnect_time = 0");
 }

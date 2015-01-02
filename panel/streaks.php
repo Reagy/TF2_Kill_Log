@@ -9,7 +9,7 @@ include 'inc/database.class.php';
 // Instantiate database.
 $database = new Database();
 
-$database->query('SELECT s.*, playerlog.`name` AS player FROM smalllog s INNER JOIN (SELECT `attacker`, `weapon`, MAX(`ks`) AS ks FROM smalllog WHERE `ks` >= 1 GROUP BY `weapon`) w ON s.`weapon` = w.`weapon` AND s.`ks` = w.`ks` INNER JOIN playerlog ON s.`attacker` = playerlog.`auth` ORDER BY `s`.`ks` DESC');
+$database->query('SELECT s.*, playerlog.`name` AS player FROM smalllog s INNER JOIN (SELECT `attacker`, `weapon`, MAX(`ks`) AS ks FROM smalllog WHERE `ks` > 1 GROUP BY `weapon`) w ON s.`weapon` = w.`weapon` AND s.`ks` = w.`ks` INNER JOIN playerlog ON s.`attacker` = playerlog.`auth` ORDER BY `s`.`ks` DESC');
 $log = $database->resultset();
 
 $database->query('SELECT name, weapon, image FROM weapons');

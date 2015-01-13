@@ -10,7 +10,7 @@
 #include <updater>
 
 #define UPDATE_URL		"https://raw.githubusercontent.com/Sinclair47/TF2_Kill_Log/master/klog.txt"
-#define PLUGIN_VERSION "0.10.5"
+#define PLUGIN_VERSION "0.10.6"
 #define MAX_LINE_WIDTH 36
 #define DMG_CRIT (1 << 20)
 #define JUMP_NONE 0
@@ -134,25 +134,23 @@ public OnLibraryAdded(const String:name[])
 
 public Action:Command_Say(client, const String:command[], args) {
 	if (IsValidClient(client)) {
-		return Plugin_Continue;
-	}
+		new String:text[512];
+		GetCmdArg(1, text, sizeof(text));
 
-	new String:text[512];
-	GetCmdArg(1, text, sizeof(text));
+		if (StrEqual(text, "!Rank", false) || StrEqual(text, "Rank", false)) {
+			new String:path[255], String:playerURL[255], String:cID[MAX_LINE_WIDTH];
+			new Handle:Kv = CreateKeyValues("data");
+			GetConVarString(g_URL,path, sizeof(path));
+			GetClientAuthId(client, AuthId_Steam2, cID, sizeof(cID));
 
-	if (StrEqual(text, "!Rank", false) || StrEqual(text, "Rank", false)) {
-		new String:path[255], String:playerURL[255], String:cID[MAX_LINE_WIDTH];
-		new Handle:Kv = CreateKeyValues("data");
-		GetConVarString(g_URL,path, sizeof(path));
-		GetClientAuthString(client, cID, sizeof(cID));
-
-		Format(playerURL, sizeof(playerURL), "http://%splayer.php?id=%s",path,cID);
-		KvSetNum(Kv, "customsvr", 1);
-		KvSetString(Kv, "type", "2");
-		KvSetString(Kv, "title", "");
-		KvSetString(Kv, "msg", playerURL);
-		ShowVGUIPanel(client, "info", Kv);
-		CloseHandle(Kv);
+			Format(playerURL, sizeof(playerURL), "http://%splayer.php?id=%s",path,cID);
+			KvSetNum(Kv, "customsvr", 1);
+			KvSetString(Kv, "type", "2");
+			KvSetString(Kv, "title", "");
+			KvSetString(Kv, "msg", playerURL);
+			ShowVGUIPanel(client, "info", Kv);
+			CloseHandle(Kv);
+		}
 	}
 	return Plugin_Continue;
 }

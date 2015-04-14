@@ -30,7 +30,13 @@ $(document).ready(function() {
 	var players = $('#players').DataTable( {
 		"processing": false,
 		"serverSide": true,
-		"ajax": "inc/server_processing.php?type=getplayers",
+		"ajax": {
+			"url": "inc/server_processing.php",
+			"type": "POST",
+			"data": {
+				"type": "getplayers"
+			}
+		},
 		"pagingType": "full",
 		"columns": [
 			{ "data": "name" },

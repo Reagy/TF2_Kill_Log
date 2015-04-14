@@ -35,7 +35,14 @@ $(document).ready(function() {
 	var players = $('#log').DataTable( {
 		"processing": false,
 		"serverSide": true,
-		"ajax": "inc/server_processing.php?id=<?php echo $player; ?>&type=getplayer",
+		"ajax": {
+			"url": "inc/server_processing.php",
+			"type": "POST",
+			"data": {
+				"type": "getplayer",
+				"id": "<?php echo $player ?>"
+			}
+		},
 		"pagingType": "full",
 		"dom": '<f<t><"pull-left" i>p>',
 		"columns": [

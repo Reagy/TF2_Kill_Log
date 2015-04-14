@@ -134,7 +134,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'getaction') {
     );
 }
 
-if (isset($_GET['type']) && $_GET['type'] == 'getplayers') {
+if (isset($_POST['type']) && $_POST['type'] == 'getplayers') {
 
     $table = 'playerlog';
     $primaryKey = 'kills';
@@ -207,11 +207,11 @@ if (isset($_GET['type']) && $_GET['type'] == 'getplayers') {
     require('ssp.class.php');
 
     echo json_encode(
-        SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery)
+        SSP::simple( $_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery)
     );
 }
 
-if (isset($_GET['type']) && $_GET['type'] == 'getplayer') {
+if (isset($_POST['type']) && $_POST['type'] == 'getplayer') {
 
     $table = 'killlog';
     $primaryKey = 'killtime';
@@ -287,13 +287,13 @@ if (isset($_GET['type']) && $_GET['type'] == 'getplayer') {
         )
     );
 
-    $extraCondition = "(`attacker` = '".$_GET['id']."')";
+    $extraCondition = "(`attacker` = '".$_POST['id']."')";
     $joinQuery = "FROM `killlog` INNER JOIN (`playerlog` as a, `playerlog` as v) ON (killlog.`attacker` = a.`auth` AND killlog.`victim` = v.`auth`)";
 
     require('ssp.class.php');
 
     echo json_encode(
-        SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraCondition)
+        SSP::simple( $_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraCondition)
     );
 }
 
@@ -337,7 +337,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'getstreak') {
     );
 }
 
-if (isset($_GET['type']) && $_GET['type'] == 'getitems') {
+if (isset($_POST['type']) && $_POST['type'] == 'getitems') {
 
     $table = 'itemlog';
     $primaryKey = 'auth';
@@ -401,17 +401,17 @@ if (isset($_GET['type']) && $_GET['type'] == 'getitems') {
         )
     );
 
-    $extraCondition = "`index` = ".$_GET['id'];
+    $extraCondition = "`index` = ".$_POST['id'];
     $joinQuery = "FROM `itemlog` INNER JOIN `playerlog` ON itemlog.`auth` = playerlog.`auth` INNER JOIN items_quality ON itemlog.`quality` = items_quality.`quality_type` LEFT JOIN items_method ON itemlog.`method` = items_method.`method_type`";
 
     require('ssp.class.php');
 
     echo json_encode(
-        SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraCondition)
+        SSP::simple( $_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraCondition)
     );
 }
 
-if (isset($_GET['type']) && $_GET['type'] == 'allitems') {
+if (isset($_POST['type']) && $_POST['type'] == 'allitems') {
 
     $table = 'itemlog';
     $primaryKey = 'time';
@@ -508,6 +508,6 @@ if (isset($_GET['type']) && $_GET['type'] == 'allitems') {
     require('ssp.class.php');
 
     echo json_encode(
-        SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery)
+        SSP::simple( $_POST, $sql_details, $table, $primaryKey, $columns, $joinQuery)
     );
 }
